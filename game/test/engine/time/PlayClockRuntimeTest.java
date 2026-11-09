@@ -62,7 +62,7 @@ class PlayClockRuntimeTest {
     hudSystem.when(HudSystem::getInstance).thenReturn(hud);
   }
 
- @AfterEach
+  @AfterEach
   void tearDown() throws ReflectiveOperationException {
     try {
       scheduler.close();
