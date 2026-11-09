@@ -62,11 +62,16 @@ class PlayClockRuntimeTest {
     hudSystem.when(HudSystem::getInstance).thenReturn(hud);
   }
 
-  @AfterEach
-  void tearDown() {
-    scheduler.close();
-    hudSystem.close();
-    game.close();
+ @AfterEach
+  void tearDown() throws ReflectiveOperationException {
+    try {
+      scheduler.close();
+      hudSystem.close();
+      game.close();
+    } finally {
+      resetStaticField("reportedPause");
+      resetStaticField("lastBroadcastRunning");
+    }
   }
 
   private static void resetStaticField(String name) throws ReflectiveOperationException {
