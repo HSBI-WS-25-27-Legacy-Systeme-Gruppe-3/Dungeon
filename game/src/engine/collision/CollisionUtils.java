@@ -1,15 +1,15 @@
-package feature.collision;
+package engine.collision;
 
 import engine.Entity;
 import engine.Game;
+import engine.components.CollideComponent;
 import engine.components.PlayerComponent;
 import engine.components.VelocityComponent;
 import engine.level.Tile;
 import engine.level.utils.LevelElement;
+import engine.systems.CollisionSystem;
 import engine.utils.Point;
 import engine.utils.Vector2;
-import feature.components.CollideComponent;
-import feature.systems.CollisionSystem;
 import java.util.List;
 import java.util.Set;
 

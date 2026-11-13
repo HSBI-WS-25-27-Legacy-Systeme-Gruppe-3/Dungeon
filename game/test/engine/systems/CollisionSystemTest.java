@@ -1,4 +1,4 @@
-package feature.systems;
+package engine.systems;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import engine.Entity;
 import engine.Game;
+import engine.components.CollideComponent;
 import engine.components.PositionComponent;
 import engine.utils.Direction;
 import engine.utils.Point;
 import engine.utils.TriConsumer;
 import engine.utils.Vector2;
-import feature.components.CollideComponent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

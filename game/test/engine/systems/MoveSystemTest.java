@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import engine.Entity;
 import engine.Game;
+import engine.components.CollideComponent;
 import engine.components.PositionComponent;
 import engine.components.VelocityComponent;
 import engine.level.DungeonLevel;
@@ -20,8 +21,6 @@ import engine.level.utils.DesignLabel;
 import engine.level.utils.LevelElement;
 import engine.utils.Point;
 import engine.utils.Vector2;
-import feature.components.CollideComponent;
-import feature.systems.CollisionSystem;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;

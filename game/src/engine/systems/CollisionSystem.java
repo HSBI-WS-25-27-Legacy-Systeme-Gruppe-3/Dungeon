@@ -1,8 +1,11 @@
-package feature.systems;
+package engine.systems;
 
 import engine.Entity;
 import engine.Game;
 import engine.System;
+import engine.collision.Collider;
+import engine.collision.CollisionUtils;
+import engine.components.CollideComponent;
 import engine.components.PlayerComponent;
 import engine.components.PositionComponent;
 import engine.components.VelocityComponent;
@@ -11,9 +14,6 @@ import engine.utils.Point;
 import engine.utils.Vector2;
 import engine.utils.components.MissingComponentException;
 import engine.utils.logging.DungeonLogger;
-import feature.collision.Collider;
-import feature.collision.CollisionUtils;
-import feature.components.CollideComponent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
