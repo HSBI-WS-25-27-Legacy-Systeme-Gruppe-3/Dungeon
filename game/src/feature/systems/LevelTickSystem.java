@@ -42,7 +42,7 @@ public class LevelTickSystem extends System {
   public void execute() {
     // Check on every execute, also without a tickable level, so the tracker stays up to date.
     if (level.get().orElse(null) instanceof ITickable tickable) {
-      tickable.onTick(levelChanges.changedSinceLastCheck(););
+      tickable.onTick(levelChanges.changedSinceLastCheck());
     }
   }
 
