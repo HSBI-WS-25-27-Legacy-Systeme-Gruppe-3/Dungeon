@@ -132,6 +132,61 @@ public class ResourcesTest {
     assertEquals(Optional.of(second), handle.get());
   }
 
+  /** A type that was never inserted has version 0. */
+  @Test
+  public void versionIsZeroForUnknownType() {
+    /** Type that is never inserted into the registry. */
+    record NeverInserted() {}
+
+    assertEquals(0L, Resources.version(NeverInserted.class));
+  }
+
+  /** Every insert increases the version, also when the same value is inserted again. */
+  @Test
+  public void everyInsertIncreasesVersion() {
+    Counter counter = new Counter(1);
+    long before = Resources.version(Counter.class);
+
+    Resources.insert(Counter.class, counter);
+    Resources.insert(Counter.class, counter);
+
+    assertEquals(before + 2, Resources.version(Counter.class));
+  }
+
+  /** Removing increases the version only if a resource was stored. */
+  @Test
+  public void removeIncreasesVersionOnlyIfPresent() {
+    long before = Resources.version(Counter.class);
+
+    Resources.remove(Counter.class);
+    assertEquals(before, Resources.version(Counter.class));
+
+    Resources.insert(Counter.class, new Counter(1));
+    Resources.remove(Counter.class);
+    assertEquals(before + 2, Resources.version(Counter.class));
+  }
+
+  /** {@code clear} does not reset versions, so trackers never miss a later change. */
+  @Test
+  public void clearDoesNotResetVersions() {
+    Resources.insert(Counter.class, new Counter(1));
+    long beforeClear = Resources.version(Counter.class);
+
+    Resources.clear();
+
+    assertTrue(Resources.version(Counter.class) > beforeClear);
+  }
+
+  /** A registry handle reports the version stored in the registry. */
+  @Test
+  public void handleReportsRegistryVersion() {
+    Res<Counter> handle = Resources.res(Counter.class);
+
+    Resources.insert(Counter.class, new Counter(1));
+
+    assertEquals(Resources.version(Counter.class), handle.version());
+  }
+
   /** The game facade reads the level from the registry. */
   @Test
   public void gameFacadeReadsFromRegistry() {

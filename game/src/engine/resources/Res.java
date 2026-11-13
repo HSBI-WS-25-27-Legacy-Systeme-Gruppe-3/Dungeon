@@ -12,6 +12,8 @@ import java.util.Optional;
  * <p>Handles for the game are provided by {@link Resources}. Tests can create a fixed handle with
  * {@link #of(Object)} or {@link #empty()} instead of setting global game state.
  *
+ * <p>To react when the resource changes, create a {@link Changes} tracker from the handle.
+ *
  * @param <T> type of the resource
  */
 @FunctionalInterface
@@ -24,6 +26,20 @@ public interface Res<T> {
    *     example because no level is loaded yet
    */
   Optional<T> get();
+
+  /**
+   * Returns the version of the resource.
+   *
+   * <p>The version increases every time the resource is inserted, replaced or removed. {@link
+   * Changes} uses it to detect changes. Handles that are not backed by the {@link Resources}
+   * registry, like {@link #of(Object)} and {@link #empty()}, never change and always return {@code
+   * 0}.
+   *
+   * @return the current version of the resource
+   */
+  default long version() {
+    return 0L;
+  }
 
   /**
    * Creates a handle that always resolves to the given value.

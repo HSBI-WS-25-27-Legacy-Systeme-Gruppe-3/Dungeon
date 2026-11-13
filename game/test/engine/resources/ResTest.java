@@ -34,6 +34,13 @@ public class ResTest {
     assertTrue(res.get().isEmpty());
   }
 
+  /** Handles that are not backed by the registry never change their version. */
+  @Test
+  public void fixedHandlesHaveVersionZero() {
+    assertEquals(0L, Res.of("level").version());
+    assertEquals(0L, Res.empty().version());
+  }
+
   /** A handle resolves the resource on every call and therefore sees replaced values. */
   @Test
   public void getResolvesOnEveryCall() {
