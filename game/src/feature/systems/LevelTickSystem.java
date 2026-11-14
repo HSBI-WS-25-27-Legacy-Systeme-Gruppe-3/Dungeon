@@ -31,7 +31,13 @@ public class LevelTickSystem extends System {
     this(Resources.level());
   }
 
-   //Intended for tests, which can pass a fixed or mutable handle instead of the game state.
+  /**
+   * Creates a new LevelTickSystem that ticks the level of the given handle.
+   *
+   * <p>Intended for tests, which can pass a fixed or mutable handle instead of the game state.
+   *
+   * @param level handle to the level to tick
+   */
   LevelTickSystem(final Res<ILevel> level) {
     super(AuthoritativeSide.BOTH);
     this.level = level;
@@ -40,7 +46,8 @@ public class LevelTickSystem extends System {
 
   @Override
   public void execute() {
-    // Check on every execute, also without a tickable level, so the tracker stays up to date.
+    // Only tickable levels need to know whether they are new. No change is lost: the next check
+    // compares with the last seen version, however many executes were skipped.
     if (level.get().orElse(null) instanceof ITickable tickable) {
       tickable.onTick(levelChanges.changedSinceLastCheck());
     }
