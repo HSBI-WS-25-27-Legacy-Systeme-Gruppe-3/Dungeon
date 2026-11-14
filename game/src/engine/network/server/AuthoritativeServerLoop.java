@@ -30,6 +30,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+// TODO: 1. Add missing imports (ILevel, Changes, Res, and Resources)
+
 /**
  * The main server loop for the authoritative multiplayer server.
  *
@@ -62,6 +64,8 @@ public final class AuthoritativeServerLoop {
   private volatile int serverTick = 0;
   private volatile boolean bootstrapComplete;
   private boolean worldInitialized;
+
+  // TODO: 2. Replace these fields (final Changes levelChanges and boolean firstLevelSeen)
   private String snapshotLevelName;
   private Object snapshotLevelIdentity;
 
@@ -70,6 +74,7 @@ public final class AuthoritativeServerLoop {
    *
    * @param netService The ServerTransport to use for network communication.
    */
+  // TODO: 3. Divide current constructor (see GitHub issue)
   public AuthoritativeServerLoop(ServerTransport netService) {
     this.net = netService;
     this.executor =
@@ -286,6 +291,8 @@ public final class AuthoritativeServerLoop {
             });
   }
 
+  // TODO: 4.1 Keep the level name check (Use levelChanges.changedSinceLastCheck())
+  // TODO: Use firstLevelSeen to skip the first reset (Reset only on later changes)
   private void clearSnapshotBaselinesOnLevelChange(Set<ClientState> clients) {
     Optional<String> currentLevel = currentLevelName();
     if (currentLevel.isEmpty()) {
@@ -304,6 +311,7 @@ public final class AuthoritativeServerLoop {
     }
   }
 
+  // TODO: 4.2 Remove this method (Changes should track the level)
   private void rememberSnapshotLevel(String levelName, Object levelIdentity) {
     snapshotLevelName = levelName;
     snapshotLevelIdentity = levelIdentity;
