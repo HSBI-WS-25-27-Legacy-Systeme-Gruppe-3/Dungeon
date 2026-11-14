@@ -21,9 +21,28 @@ und brauchen keinen globalen Zustand mehr.
 | Registry | [`Resources`](../game/src/engine/resources/Resources.java) | speichert alle Ressourcen. Der Schlüssel ist der Typ, z. B. `ILevel.class` |
 | Handle | [`Res<T>`](../game/src/engine/resources/Res.java) | Verweis auf eine Ressource, **nur zum Lesen**. Liest bei jedem `get()` den aktuellen Wert, wird also nach einem Levelwechsel nicht veraltet |
 | Tracker | [`Changes`](../game/src/engine/resources/Changes.java) | merkt sich für **ein** System, ob sich eine Ressource seit dem letzten Prüfen geändert hat |
+| Ressourcen-Sicht | z. B. [`LevelCollisionView`](../game/src/engine/collision/LevelCollisionView.java) | kleines Objekt, das einen Handle hält und eine Art von Frage zu der Ressource beantwortet |
 | Besitzer | z. B. `LevelSystem` | der Einzige, der eine Ressource setzt oder entfernt |
 
 Daten, die es **pro Entity** gibt, bleiben Components. Ressourcen sind nur für Dinge, die es einmal gibt.
+
+## Namen
+
+| Was | Klassenname | Feldname | Beispiel |
+|---|---|---|---|
+| Handle | `Res<T>` | nach der Ressource | `Res<ILevel> level` |
+| Tracker | `Changes` | `<ressource>Changes` | `Changes levelChanges` |
+| Ressourcen-Sicht | `<Ressource><Thema>View` | wie die Klasse, in lowerCamelCase | `LevelCollisionView levelCollisionView` |
+
+- **Ressourcen-Sichten enden immer auf `View`**, so wie Systems immer auf `System` enden. Vorne steht
+  die Ressource, dahinter das Thema der Fragen: `LevelCollisionView` beantwortet Kollisionsfragen zum
+  Level. Spätere Sichten heißen entsprechend, z. B. `LevelPathView` für die Wegfindung oder
+  `LevelVisibilityView` für Sicht und Nebel.
+- **Ein Feld heißt wie sein Typ in lowerCamelCase**, es sei denn, ein anderer Name sagt deutlich mehr.
+  Keine Abkürzungen und keine Namen, die nach etwas anderem klingen: `tiles` würde z. B. nach einer
+  Liste von Tiles klingen, nicht nach einer Kollisionsprüfung.
+- **Nicht verwenden:** `…Service` (klingt nach eigenem Zustand und Lebenszyklus), `…Query` (wird mit
+  Entity-Abfragen im ECS verwechselt) und `…Utils` für etwas, das einen Handle hält.
 
 ## Die Regeln
 
@@ -32,7 +51,9 @@ Daten, die es **pro Entity** gibt, bleiben Components. Ressourcen sind nur für 
 2. **Zwei Konstruktoren:** ein `public`-Konstruktor ohne Parameter für das Spiel und einer **ohne**
    `public` mit einem `Res`-Parameter für Tests.
 3. **Helfer bekommen Werte, keine Handles.** Das System holt das Level einmal und reicht es als
-   Parameter weiter. Hilfsmethoden rufen weder `Game` noch `Resources` auf.
+   Parameter weiter. Hilfsmethoden rufen weder `Game` noch `Resources` auf. Einzige Ausnahme ist
+   eine [Ressourcen-Sicht](#ressourcen-sicht-levelcollisionview) wie `LevelCollisionView`: Sie hält
+   selbst einen Handle und wird deshalb wie ein Handle im Konstruktor erzeugt.
 4. **Mit einer fehlenden Ressource rechnen.** `get()` liefert ein `Optional`. Ohne Level tut das System
    einfach nichts.
 5. **Nur der Besitzer schreibt.** Das Level setzt ausschließlich das `LevelSystem`.
@@ -111,7 +132,8 @@ public void execute() {
 4. **Helfer mit Level-Zugriff:** Ruft das System einen Helfer auf, der selbst `Game.currentLevel()`
    oder `Game.tileAt(...)` benutzt (z. B. in `LevelUtils`), bekommt der Helfer eine **neue Variante
    mit `ILevel`-Parameter**. Die alte Variante bleibt vorerst und ruft die neue auf. Das System
-   benutzt die neue Variante und übergibt sein Level.
+   benutzt die neue Variante und übergibt sein Level. Für die Frage „Ist diese Position blockiert?“
+   gibt es schon fertig [`LevelCollisionView`](#ressourcen-sicht-levelcollisionview).
 5. **Test anpassen:** statt `Game.currentLevel(mockedLevel)` das System mit eigenem Handle erzeugen,
    siehe unten. Der Test muss im **gleichen Paket** liegen wie das System (z. B.
    `game/test/engine/systems/` für `engine.systems`), sonst ist der Testkonstruktor nicht sichtbar.
@@ -143,6 +165,36 @@ system.execute();
 
 Ein vollständiges Beispiel steht in
 [`LevelTickSystemTest`](../game/test/feature/systems/LevelTickSystemTest.java).
+
+## Ressourcen-Sicht: `LevelCollisionView`
+
+Manche Fragen an das Level stellt ein System sehr oft und aus vielen privaten Methoden heraus, z. B.
+„Ist diese Position blockiert?“ im `MoveSystem`. Das Level dafür durch jede Methode zu reichen, wäre
+umständlich. Dafür gibt es **Ressourcen-Sichten**: kleine Objekte, die einen Handle halten und genau
+eine Art von Frage beantworten.
+
+[`LevelCollisionView`](../game/src/engine/collision/LevelCollisionView.java) beantwortet, ob eine
+Position oder ein Collider an einer Position im aktuellen Level blockiert ist:
+
+```java
+private final LevelCollisionView levelCollisionView;
+
+MoveSystem(final Res<ILevel> level) {
+  super(VelocityComponent.class, PositionComponent.class);
+  this.levelCollisionView = new LevelCollisionView(level); // wie ein Handle im Konstruktor erzeugen
+}
+
+// irgendwo in der Logik:
+if (levelCollisionView.isBlocked(collider, newPos, vc.canEnterWalls())) { … }
+```
+
+- Eine Position ist **blockiert**, wenn es kein Level gibt, kein Tile an der Position oder das Tile
+  nicht betreten werden darf. Wände dürfen Entities mit `canEnterWalls()` trotzdem betreten.
+- Vorbilder sind [`MoveSystem`](../game/src/engine/systems/MoveSystem.java) und `CollisionSystem`.
+  Der Test [`MoveSystemTest`](../game/test/engine/systems/MoveSystemTest.java) setzt sein Level mit
+  `MutableRes`, ganz ohne `Game.currentLevel(...)`.
+- Eine neue Ressourcen-Sicht lohnt sich erst, wenn mehrere Systems dieselbe Frage stellen. Für eine
+  einzelne Abfrage reicht `level.get()`.
 
 ## Auf einen Levelwechsel reagieren: `Changes`
 

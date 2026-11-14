@@ -438,8 +438,9 @@ public class CollisionSystemTest {
   //  /**
   //   * Checks if two solid entities collide then the collision will be resolved by moving one of
   // them out.
-  //   * This case currently always fails, because we dont instantiate a level, so any
-  // CollisionUtils.isCollidingWithLevel will always return true.
+  //   * This case currently always fails, because we dont instantiate a level, so the level check
+  // in LevelCollisionView.isBlocked will always return true. It could pass its own level via the
+  // CollisionSystem(Res) constructor.
   //   */
   //  @Test
   //  public void checkSolidCollideWithMass(){
