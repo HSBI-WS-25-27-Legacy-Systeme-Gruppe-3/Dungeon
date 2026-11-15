@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 public class AuthoritativeServerLoopTest {
 
@@ -18,6 +18,19 @@ public class AuthoritativeServerLoopTest {
     serverTransport = mock(ServerTransport.class);
     serverLoop = new AuthoritativeServerLoop(serverTransport);
     serverLoop.start();
+  }
+
+  // TODO: Verify that no client baselines are reset when the first level is detected.
+  @Test
+  void dontClearBaselineAtFirstLevel () {
+    ClientState client = mock(ClientState.class);
+
+    /*
+      serverLoop.clearSnapshotBaselinesOnLevelChange(Set.of(client));
+
+      verify(client, never()).clearSnapshotBaseline(any());
+    }
+     */
   }
 
   @AfterEach
@@ -34,10 +47,10 @@ public class AuthoritativeServerLoopTest {
 
 
 
-// TODO: Verify that no client baselines are reset when the first level is detected.
+
 
 // TODO: Verify that each subsequent level change clears the snapshot history
-//  and resets the baselines of all connected clients.
+//  and resets the baselines of all connected clients. (look: resources.md)
 
 // TODO: Verify that client baselines and snapshot history are not reset when the level is unchanged.
 

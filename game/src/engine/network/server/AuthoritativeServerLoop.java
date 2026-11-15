@@ -218,8 +218,11 @@ public final class AuthoritativeServerLoop {
 
   private void sendSnapshotToClient(ClientState client, SnapshotMessage currentSnapshot) {
     ClientSnapshotSyncState snapshotSync = client.snapshotSync();
+
+    // Snapshot confirmation of client
     int ackTick = snapshotSync.lastAckedSnapshotTick();
     boolean hasAck = snapshotSync.hasAck();
+
     boolean baselineInHistory = hasAck && snapshotHistory.contains(ackTick);
     NetworkTelemetry.recordBaselineHealth(
         client.clientId(),
@@ -293,17 +296,23 @@ public final class AuthoritativeServerLoop {
 
   // TODO: 4.1 Keep the level name check (Use levelChanges.changedSinceLastCheck())
   // TODO: Use firstLevelSeen to skip the first reset (Reset only on later changes)
-  private void clearSnapshotBaselinesOnLevelChange(Set<ClientState> clients) {
+
+  // TODO: Discussion point because of change to package privat
+  void clearSnapshotBaselinesOnLevelChange(Set<ClientState> clients) {
     Optional<String> currentLevel = currentLevelName();
     if (currentLevel.isEmpty()) {
       return;
     }
     String levelName = currentLevel.orElseThrow();
     Object levelIdentity = Game.currentLevel().map(level -> (Object) level).orElse(null);
+
+    // Protection that no reset of the baseline happens at the first level
     if (snapshotLevelName == null && snapshotLevelIdentity == null) {
       rememberSnapshotLevel(levelName, levelIdentity);
       return;
     }
+
+    // Baseline clearing process
     if (!levelName.equals(snapshotLevelName) || levelIdentity != snapshotLevelIdentity) {
       snapshotHistory.clear();
       clients.forEach(client -> client.clearSnapshotBaseline(FullSnapshotSendReason.LEVEL_CHANGE));
