@@ -29,7 +29,7 @@ Nehmt euch bitte Tickets, welche in der Spalte `Todo` hängen. Um ein Ticket zu 
 * * tests: hier werden alle Testtickets gesammelt und somit können diese gesammelt in `golden-copy` übernommen werden
 * * developement: damit bei der Entwicklung immer mit den aktuellsten Tests (des alten Systems) getestet werden kann, so dass es schneller auffällt, wenn was kaputt geht
 
-##### Andere Entwickler Tickets
+#### Andere Entwickler Tickets
 
 * Ausgehend von `master` abzweigen (*keine* verschachtelten Branches)
 * Werden in develope gemergt
