@@ -11,17 +11,32 @@ Zur besseren Zusammenarbeit im Team gelten folgende Konventionen für Issues und
 * **Referenzen/Anhänge**: ggf. relevante Stellen im Code deutlich machen (zB. mit `https://github.com/HSBI-WS-25-27-Legacy-Systeme-Gruppe-3/Dungeon/blob/7c8bf700f10c3551ce7e0be22773e830602facc6/game/src/engine/configuration/Configuration.java#L35-L48`)
 * **Labels**: passend vergeben, falls nötig (zB. `Architektur`).
 
-### Worfklow
+## Worfklow
 
 Nehmt euch bitte Tickets, welche in der Spalte `Todo` hängen. Um ein Ticket zu "schnappen" , setzt ihr euch auf `assignee` und ändert den Status auf `In Progress`. Sobald PR das Ticket erstellt wurde, kann dieser hier (rechts unten unter `Development`) verlinkt werden. Sobald ihr fertig seid setzt ihr Status auf `In Review`, sodass andere den PR (nach Review) freigeben - nach dem Merge wechselt Status dann automatisch auf `Done`.
+
+### Branches
+
+**Benennung**: `<ticketnr>-<description>` (zB. `3-test-coverage`)
+
+![doc/img/workflow.png](doc/img/workflow.png)
+
+#### Test-Tickets
+
+* ausgehend von `golden-copy`
+* werden in developement *und* tests gemergt
+* warum in beide?
+* * tests: hier werden alle Testtickets gesammelt und somit können diese gesammelt in `golden-copy` übernommen werden
+* * developement: damit bei der Entwicklung immer mit den aktuellsten Tests (des alten Systems) getestet werden kann, so dass es schneller auffällt, wenn was kaputt geht
+
+##### Andere Entwickler Tickets
+
+* Ausgehend von `master` abzweigen (*keine* verschachtelten Branches)
+* Werden in develope gemergt
 
 ## Pull Requests
 
 **HINWEIS**: Achtet darauf, Branches und PRs (Target-Branches) auf dem Fork zu erstellen, nicht auf dem originalen Dungeon Repo.
-
-### Branches
-* Ausgehend von `master` abzweigen (*keine* verschachtelten Branches). 
-* **Benennung**: `<ticketnr>-<description>` (zB. `3-test-coverage`)
 
 ### Assignee & Titel
 * **Sprache**: Titel und Beschreibung auf englisch (sofern es keine Sprachprobleme gibt).
