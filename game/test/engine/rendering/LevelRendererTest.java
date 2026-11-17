@@ -62,9 +62,7 @@ class LevelRendererTest {
   }
 
   @ParameterizedTest
-  @CsvSource({
-    "0,1,24", "1,0,37", "0,-1,0", "-1,0,39", "1,1,44", "1,-1,8", "-1,-1,11", "-1,1,47"
-  })
+  @CsvSource({"0,1,24", "1,0,37", "0,-1,0", "-1,0,39", "1,1,44", "1,-1,8", "-1,-1,11", "-1,1,47"})
   void directionalConnectionsUseFixedAtlasCells(int dx, int dy, int expectedCell) {
     Tile[][] layout = floors(3, 3);
     layout[1][1] = wall(1, 1);
