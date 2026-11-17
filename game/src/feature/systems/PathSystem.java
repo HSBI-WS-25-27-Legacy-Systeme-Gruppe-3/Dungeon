@@ -2,7 +2,11 @@ package feature.systems;
 
 import engine.Entity;
 import engine.System;
+import engine.level.elements.ILevel;
+import engine.resources.Res;
+import engine.resources.Resources;
 import feature.ai.AIUtils;
+import feature.ai.LevelPathView;
 import feature.components.PathComponent;
 import java.util.List;
 import java.util.Optional;
@@ -17,12 +21,26 @@ import java.util.Optional;
  */
 public class PathSystem extends System {
 
+  private final LevelPathView levelPathView;
+
   /**
    * The constructor for the PathSystem class. It creates a new System with a component filter for
    * {@link PathComponent}.
    */
   public PathSystem() {
+    this(Resources.level());
+  }
+
+  /**
+   * Creates a PathSystem that moves entities in the level of the given handle.
+   *
+   * <p>Intended for tests, which can pass a fixed or mutable handle instead of the game state.
+   *
+   * @param level handle to the level the entities move in
+   */
+  PathSystem(final Res<ILevel> level) {
     super(PathComponent.class);
+    this.levelPathView = new LevelPathView(level);
   }
 
   /**
@@ -44,8 +62,8 @@ public class PathSystem extends System {
   }
 
   private Optional<Entity> processEntity(PSData data) {
-    AIUtils.followPath(data.entity, data.pathComponent.path());
-    return AIUtils.pathFinished(data.entity, data.pathComponent.path())
+    levelPathView.followPath(data.entity, data.pathComponent.path());
+    return levelPathView.pathFinished(data.entity, data.pathComponent.path())
         ? Optional.of(data.entity)
         : Optional.empty();
   }
