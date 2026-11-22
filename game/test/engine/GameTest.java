@@ -4,20 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import engine.level.elements.ILevel;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import testingUtils.CleanGame;
 
 /** Tests for the {@link Game} class. */
+@CleanGame
 public class GameTest {
-  /** WTF? . */
-  @AfterEach
-  public void cleanup() {
-    Game.removeAllEntities();
-    Game.removeAllSystems();
-    Game.currentLevel(null);
-  }
-
   /** WTF? . */
   @Test
   public void allEntites() {

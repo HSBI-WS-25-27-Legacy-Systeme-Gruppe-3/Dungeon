@@ -41,6 +41,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import testingUtils.CleanGame;
 import testingUtils.MockNetworkHandler;
 
 /**
@@ -49,6 +50,7 @@ import testingUtils.MockNetworkHandler;
  * <p>Validates Netty-based server transport initialization, channel lifecycle, session management,
  * message broadcasting, and input queue handling.
  */
+@CleanGame
 public class ServerTransportTests {
 
   private static final int TEST_PORT = 17777;

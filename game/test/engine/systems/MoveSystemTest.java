@@ -25,11 +25,12 @@ import feature.systems.CollisionSystem;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 
 /** Unit tests for the {@link MoveSystem}. */
+@CleanGame
 public class MoveSystemTest {
 
   private static final float EPSILON = 0.00001f;
@@ -57,12 +58,6 @@ public class MoveSystemTest {
 
     // Setup initial position and velocity default
     vc.currentVelocity(Vector2.ZERO);
-  }
-
-  @AfterEach
-  void cleanUp() {
-    Game.removeAllSystems();
-    Game.removeAllEntities();
   }
 
   /**
