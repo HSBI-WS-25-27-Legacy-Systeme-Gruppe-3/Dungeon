@@ -1,5 +1,11 @@
 package engine.network.server;
 
+import engine.Game;
+import engine.level.elements.ILevel;
+import engine.level.loader.DungeonLoader;
+import java.util.Optional;
+import java.util.Set;
+import org.mockito.MockedStatic;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,17 +26,20 @@ public class AuthoritativeServerLoopTest {
     serverLoop.start();
   }
 
-  // TODO: Verify that no client baselines are reset when the first level is detected.
   @Test
-  void dontClearBaselineAtFirstLevel () {
+  void dontClearBaselineAtFirstLevel() {
     ClientState client = mock(ClientState.class);
+    ILevel level = mock(ILevel.class);
 
-    /*
+    try (MockedStatic<DungeonLoader> dungeonLoader = mockStatic(DungeonLoader.class);
+        MockedStatic<Game> game = mockStatic(Game.class)) {
+      dungeonLoader.when(DungeonLoader::currentLevel).thenReturn("test-level");
+      game.when(Game::currentLevel).thenReturn(Optional.of(level));
+
       serverLoop.clearSnapshotBaselinesOnLevelChange(Set.of(client));
 
       verify(client, never()).clearSnapshotBaseline(any());
     }
-     */
   }
 
   @AfterEach
