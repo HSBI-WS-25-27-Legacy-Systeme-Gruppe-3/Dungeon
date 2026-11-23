@@ -21,30 +21,13 @@ import static org.mockito.Mockito.*;
 
 public class AuthoritativeServerLoopTest {
 
-  private ServerTransport serverTransport;
   private AuthoritativeServerLoop serverLoop;
 
   @BeforeEach
   public void setUp() {
-    serverTransport = mock(ServerTransport.class);
+    ServerTransport serverTransport = mock(ServerTransport.class);
     serverLoop = new AuthoritativeServerLoop(serverTransport);
     serverLoop.start();
-  }
-
-  @Test
-  void dontClearBaselineAtFirstLevel() {
-    ClientState client = mock(ClientState.class);
-    ILevel level = mock(ILevel.class);
-
-    try (MockedStatic<DungeonLoader> dungeonLoader = mockStatic(DungeonLoader.class);
-        MockedStatic<Game> game = mockStatic(Game.class)) {
-      dungeonLoader.when(DungeonLoader::currentLevel).thenReturn("test-level");
-      game.when(Game::currentLevel).thenReturn(Optional.of(level));
-
-      serverLoop.clearSnapshotBaselinesOnLevelChange(Set.of(client));
-
-      verify(client, never()).clearSnapshotBaseline(any());
-    }
   }
 
   @AfterEach
@@ -59,12 +42,21 @@ public class AuthoritativeServerLoopTest {
     assertFalse(serverLoop.isRunning());
   }
 
+  @Test
+  void dontClearBaselineAtFirstLevel() {
+    ClientState client = mock(ClientState.class);
+    ILevel level = mock(ILevel.class);
 
+    try (MockedStatic<DungeonLoader> dungeonLoader = mockStatic(DungeonLoader.class);
+         MockedStatic<Game> game = mockStatic(Game.class)) {
+      dungeonLoader.when(DungeonLoader::currentLevel).thenReturn("test-level");
+      game.when(Game::currentLevel).thenReturn(Optional.of(level));
 
+      serverLoop.clearSnapshotBaselinesOnLevelChange(Set.of(client));
 
-
-// TODO: Verify that each subsequent level change clears the snapshot history
-//  and resets the baselines of all connected clients. (look: resources.md)
+      verify(client, never()).clearSnapshotBaseline(any());
+    }
+  }
 
   @Test
   void keepClientBaselineAndSnapshotsAtUnchangedLevel() throws ReflectiveOperationException {
@@ -98,5 +90,7 @@ public class AuthoritativeServerLoopTest {
     }
   }
 
+// TODO: Verify that each subsequent level change clears the snapshot history
+//  and resets the baselines of all connected clients. (look: resources.md)
 // TODO: Verify that a new level object is detected as a level change, even if its name is unchanged.
 }
