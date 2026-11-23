@@ -3,6 +3,7 @@ package engine.network.server;
 import engine.Game;
 import engine.level.elements.ILevel;
 import engine.level.loader.DungeonLoader;
+import engine.network.FullSnapshotSendReason;
 import engine.network.delta.SnapshotHistory;
 import engine.network.messages.s2c.SnapshotMessage;
 import java.lang.reflect.Field;
@@ -90,7 +91,40 @@ public class AuthoritativeServerLoopTest {
     }
   }
 
+  @Test
+  void clearClientBaselinesAndSnapshotsWhenLevelObjectChangesDespiteSameName()
+      throws ReflectiveOperationException {
+    ClientState firstClient = mock(ClientState.class);
+    ClientState secondClient = mock(ClientState.class);
+    Set<ClientState> clients = Set.of(firstClient, secondClient);
+    ILevel firstLevel = mock(ILevel.class);
+    ILevel secondLevel = mock(ILevel.class);
+    Field historyField = AuthoritativeServerLoop.class.getDeclaredField("snapshotHistory");
+    historyField.setAccessible(true);
+    SnapshotHistory history = (SnapshotHistory) historyField.get(serverLoop);
+
+    try (MockedStatic<DungeonLoader> dungeonLoader = mockStatic(DungeonLoader.class)) {
+      try (MockedStatic<Game> game = mockStatic(Game.class)) {
+        dungeonLoader.when(DungeonLoader::currentLevel).thenReturn("test-level");
+        game.when(Game::currentLevel).thenReturn(Optional.of(firstLevel));
+        serverLoop.clearSnapshotBaselinesOnLevelChange(clients);
+        history.add(new SnapshotMessage(10, List.of(), null));
+        history.add(new SnapshotMessage(20, List.of(), null));
+        assertEquals(2, history.size());
+
+        game.when(Game::currentLevel).thenReturn(Optional.of(secondLevel));
+        serverLoop.clearSnapshotBaselinesOnLevelChange(clients);
+
+        assertEquals(0, history.size());
+        assertTrue(history.snapshot(10).isEmpty());
+        assertTrue(history.snapshot(20).isEmpty());
+        verify(firstClient).clearSnapshotBaseline(FullSnapshotSendReason.LEVEL_CHANGE);
+        verify(secondClient).clearSnapshotBaseline(FullSnapshotSendReason.LEVEL_CHANGE);
+      }
+    }
+  }
+
 // TODO: Verify that each subsequent level change clears the snapshot history
 //  and resets the baselines of all connected clients. (look: resources.md)
-// TODO: Verify that a new level object is detected as a level change, even if its name is unchanged.
+
 }
