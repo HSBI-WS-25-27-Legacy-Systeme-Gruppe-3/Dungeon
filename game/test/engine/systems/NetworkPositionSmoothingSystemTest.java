@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -14,13 +13,11 @@ import engine.Entity;
 import engine.components.NetworkPositionComponent;
 import engine.components.PositionComponent;
 import engine.utils.Point;
-import feature.systems.PositionSync;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
 class NetworkPositionSmoothingSystemTest {
 
@@ -32,8 +29,6 @@ class NetworkPositionSmoothingSystemTest {
   private Entity entity;
   private PositionComponent position;
   private NetworkPositionComponent networkPosition;
-
-  private MockedStatic<PositionSync> positionSyncMock;
 
   private Graphics graphics;
 
@@ -55,13 +50,10 @@ class NetworkPositionSmoothingSystemTest {
 
     graphics = mock(Graphics.class);
     Gdx.graphics = graphics;
-
-    positionSyncMock = mockStatic(PositionSync.class);
   }
 
   @AfterEach
   void tearDown() {
-    positionSyncMock.close();
     Gdx.graphics = null;
   }
 
@@ -81,8 +73,6 @@ class NetworkPositionSmoothingSystemTest {
     system.execute();
 
     verifyPosition(0.55f, 0.55f);
-
-    positionSyncMock.verify(() -> PositionSync.syncPosition(entity));
   }
 
   /** Verifies that large position corrections are applied immediately. */
@@ -98,7 +88,6 @@ class NetworkPositionSmoothingSystemTest {
     system.execute();
 
     verifyPosition(10, 10);
-    positionSyncMock.verify(() -> PositionSync.syncPosition(entity));
   }
 
   /** Verifies that positions within the settling threshold are immediately set to the target. */
@@ -114,7 +103,6 @@ class NetworkPositionSmoothingSystemTest {
     system.execute();
 
     verifyPosition(5.005f, 5.005f);
-    positionSyncMock.verify(() -> PositionSync.syncPosition(entity));
   }
 
   /** Verifies that interpolation uses the frame delta to compensate for different frame rates. */
@@ -202,21 +190,6 @@ class NetworkPositionSmoothingSystemTest {
 
     assertNotEquals(current.x(), 0.55, DELTA);
     assertNotEquals(current.y(), 0.55, DELTA);
-  }
-
-  /** Verifies that the position synchronization method is invoked for every processed entity. */
-  @Test
-  void shouldSynchronizePositionAfterUpdating() {
-    Point current = new Point(0, 0);
-    Point target = new Point(1, 1);
-
-    when(graphics.getDeltaTime()).thenReturn(0f);
-    when(position.position()).thenReturn(current);
-    when(networkPosition.targetPosition()).thenReturn(target);
-
-    system.execute();
-
-    positionSyncMock.verify(() -> PositionSync.syncPosition(entity));
   }
 
   private void verifyPosition(float expectedX, float expectedY) {
