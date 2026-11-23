@@ -124,7 +124,4 @@ public class AuthoritativeServerLoopTest {
     }
   }
 
-// TODO: Verify that each subsequent level change clears the snapshot history
-//  and resets the baselines of all connected clients. (look: resources.md)
-
 }
