@@ -9,6 +9,7 @@ import engine.Entity;
 import engine.Game;
 import engine.game.ECSManagement;
 import engine.game.PreRunConfiguration;
+import engine.level.elements.ILevel;
 import engine.level.loader.DungeonLoader;
 import engine.network.FullSnapshotSendReason;
 import engine.network.NetworkTelemetry;
@@ -17,6 +18,9 @@ import engine.network.delta.SnapshotHistory;
 import engine.network.messages.s2c.DeltaSnapshotMessage;
 import engine.network.messages.s2c.GameOverEvent;
 import engine.network.messages.s2c.SnapshotMessage;
+import engine.resources.Changes;
+import engine.resources.Res;
+import engine.resources.Resources;
 import engine.utils.Point;
 import engine.utils.logging.DungeonLogger;
 import feature.entities.HeroBuilder;
@@ -65,18 +69,24 @@ public final class AuthoritativeServerLoop {
   private volatile boolean bootstrapComplete;
   private boolean worldInitialized;
 
-  // TODO: 2. Replace these fields (final Changes levelChanges and boolean firstLevelSeen)
-  private String snapshotLevelName;
-  private Object snapshotLevelIdentity;
+  private final Changes levelChanges;
+  private boolean firstLevelSeen;
+
+  public AuthoritativeServerLoop(ServerTransport netService) {
+    this(netService, Resources.level());
+  }
 
   /**
-   * Creates a new AuthoritativeServerLoop with the given ServerTransport.
+   * Creates a new AuthoritativeServerLoop that detects level changes of the given handle.
+   *
+   * <p>Intended for tests, which can pass a fixed or mutable handle instead of the game state.
    *
    * @param netService The ServerTransport to use for network communication.
+   * @param level handle to the level whose changes reset the snapshot baselines
    */
-  // TODO: 3. Divide current constructor (see GitHub issue)
-  public AuthoritativeServerLoop(ServerTransport netService) {
+  AuthoritativeServerLoop(ServerTransport netService, Res<ILevel> level) {
     this.net = netService;
+    this.levelChanges = Changes.of(level);
     this.executor =
         Executors.newSingleThreadScheduledExecutor(
             r -> {
@@ -294,36 +304,21 @@ public final class AuthoritativeServerLoop {
             });
   }
 
-  // TODO: 4.1 Keep the level name check (Use levelChanges.changedSinceLastCheck())
-  // TODO: Use firstLevelSeen to skip the first reset (Reset only on later changes)
-
-  // TODO: Discussion point because of change to package privat
-  void clearSnapshotBaselinesOnLevelChange(Set<ClientState> clients) {
-    Optional<String> currentLevel = currentLevelName();
-    if (currentLevel.isEmpty()) {
+  private void clearSnapshotBaselinesOnLevelChange(Set<ClientState> clients) {
+    // As before, only levels loaded by the DungeonLoader (they have a name) are considered.
+    if (currentLevelName().isEmpty()) {
       return;
     }
-    String levelName = currentLevel.orElseThrow();
-    Object levelIdentity = Game.currentLevel().map(level -> (Object) level).orElse(null);
-
-    // Protection that no reset of the baseline happens at the first level
-    if (snapshotLevelName == null && snapshotLevelIdentity == null) {
-      rememberSnapshotLevel(levelName, levelIdentity);
+    if (!levelChanges.changedSinceLastCheck()) {
       return;
     }
-
-    // Baseline clearing process
-    if (!levelName.equals(snapshotLevelName) || levelIdentity != snapshotLevelIdentity) {
-      snapshotHistory.clear();
-      clients.forEach(client -> client.clearSnapshotBaseline(FullSnapshotSendReason.LEVEL_CHANGE));
-      rememberSnapshotLevel(levelName, levelIdentity);
+    if (!firstLevelSeen) {
+      // The first level only becomes the starting point; there is nothing to clear yet.
+      firstLevelSeen = true;
+      return;
     }
-  }
-
-  // TODO: 4.2 Remove this method (Changes should track the level)
-  private void rememberSnapshotLevel(String levelName, Object levelIdentity) {
-    snapshotLevelName = levelName;
-    snapshotLevelIdentity = levelIdentity;
+    snapshotHistory.clear();
+    clients.forEach(client -> client.clearSnapshotBaseline(FullSnapshotSendReason.LEVEL_CHANGE));
   }
 
   private Optional<String> currentLevelName() {
