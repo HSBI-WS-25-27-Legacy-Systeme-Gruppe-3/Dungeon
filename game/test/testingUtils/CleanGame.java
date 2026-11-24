@@ -12,9 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * Resets the global game state before and after every test of the annotated test class.
  *
  * <p>Before each test there are no entities, no systems (not even the essential systems that {@link
- * engine.game.ECSManagement} registers when it is loaded), no current level and no registered level
- * order in the {@link engine.level.loader.DungeonLoader}. The same reset runs again after each
- * test, even if the test failed. Tests therefore need no own cleanup code for this state.
+ * engine.game.ECSManagement} registers when it is loaded), no current level, no {@link
+ * engine.resources.Resources} and no registered level order in the {@link
+ * engine.level.loader.DungeonLoader}. The same reset runs again after each test, even if the test
+ * failed. Tests therefore need no own cleanup code for this state.
  *
  * <p>Further global state can be reset by implementing a {@link TestStateReset}.
  *

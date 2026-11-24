@@ -2,6 +2,7 @@ package testingUtils;
 
 import engine.Game;
 import engine.level.loader.DungeonLoader;
+import engine.resources.Resources;
 import engine.systems.LevelSystem;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,8 +69,8 @@ public final class CleanGameExtension implements BeforeEachCallback, AfterEachCa
   }
 
   /**
-   * Clears the game state that every test can change: entities, systems, the current level and the
-   * level order of the {@link DungeonLoader}.
+   * Clears the game state that every test can change: entities, systems, the current level, all
+   * {@link Resources} and the level order of the {@link DungeonLoader}.
    */
   static void clearGameState() {
     // Entities first, so that the systems are still informed about the removed entities.
@@ -80,6 +81,7 @@ public final class CleanGameExtension implements BeforeEachCallback, AfterEachCa
       // callback of a test.
       new LevelSystem().loadLevel(null);
     }
+    Resources.clear();
     // Only the level order is cleared. The level files stay known, because the DungeonLoader
     // searches for them only once, when the class is loaded.
     DungeonLoader.clearLevelOrder();

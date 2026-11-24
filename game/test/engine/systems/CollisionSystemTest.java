@@ -12,12 +12,13 @@ import engine.utils.Direction;
 import engine.utils.Point;
 import engine.utils.TriConsumer;
 import engine.utils.Vector2;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 import testingUtils.SimpleCounter;
 
 /** WTF? . */
+@CleanGame
 public class CollisionSystemTest {
 
   private static final String DIRECTION_MESSAGE = "The Direction of the Collision should be.";
@@ -60,12 +61,6 @@ public class CollisionSystemTest {
     Entity e1 = new Entity();
     e1.add(new PositionComponent(point1));
     return e1;
-  }
-
-  /** WTF? . */
-  @AfterEach
-  public void cleanup() {
-    cleanUpEnvironment();
   }
 
   /**
