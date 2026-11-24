@@ -10,6 +10,8 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import engine.resources.Res;
 import org.mockito.MockedStatic;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +28,10 @@ public class AuthoritativeServerLoopTest {
 
   @BeforeEach
   public void setUp() {
+    Res<ILevel> res = mock(Res.class);
+    when(res.version()).thenReturn(1L, 2L);
     ServerTransport serverTransport = mock(ServerTransport.class);
-    serverLoop = new AuthoritativeServerLoop(serverTransport);
+    serverLoop = new AuthoritativeServerLoop(serverTransport, res);
     serverLoop.start();
   }
 

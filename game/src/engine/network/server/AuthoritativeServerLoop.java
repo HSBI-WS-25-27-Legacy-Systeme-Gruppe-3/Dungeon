@@ -304,7 +304,7 @@ public final class AuthoritativeServerLoop {
             });
   }
 
-  private void clearSnapshotBaselinesOnLevelChange(Set<ClientState> clients) {
+  public void clearSnapshotBaselinesOnLevelChange(Set<ClientState> clients) {
     // As before, only levels loaded by the DungeonLoader (they have a name) are considered.
     if (currentLevelName().isEmpty()) {
       return;
