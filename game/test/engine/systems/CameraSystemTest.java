@@ -10,6 +10,7 @@ import engine.components.CameraComponent;
 import engine.components.PositionComponent;
 import engine.level.Tile;
 import engine.level.elements.ILevel;
+import engine.resources.MutableRes;
 import engine.utils.Point;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -27,16 +28,17 @@ public class CameraSystemTest {
   private final Tile startTile = Mockito.mock(Tile.class);
   private CameraSystem cameraSystem;
   private Point expectedFocusPoint;
+  private MutableRes<ILevel> levelRes;
 
   /** WTF? . */
   @BeforeEach
   public void setup() {
-    cameraSystem = new CameraSystem();
+    levelRes = new MutableRes<>(null);
+    cameraSystem = new CameraSystem(levelRes);
     Game.add(cameraSystem);
     Mockito.when(startTile.position()).thenReturn(testPoint);
     Mockito.when(level.randomTilePoint(Mockito.any())).thenReturn(Optional.of(testPoint));
     Mockito.when(level.startTile()).thenReturn(Optional.of(startTile));
-    Game.add(new LevelSystem());
   }
 
   /** Resets the camera after each test. */
@@ -50,7 +52,7 @@ public class CameraSystemTest {
   /** WTF? . */
   @Test
   public void executeWithEntity() {
-    Game.currentLevel(level);
+    levelRes.set(level);
     Entity entity = new Entity();
     expectedFocusPoint = new Point(3, 3);
     PositionComponent positionComponent = new PositionComponent(expectedFocusPoint);
@@ -65,8 +67,7 @@ public class CameraSystemTest {
   /** WTF? . */
   @Test
   public void executeWithoutEntity() {
-    Game.currentLevel(level);
-
+    levelRes.set(level);
     expectedFocusPoint = level.startTile().orElseThrow().position();
 
     cameraSystem.execute();
@@ -78,7 +79,7 @@ public class CameraSystemTest {
   /** WTF? . */
   @Test
   public void executeWithoutLevel() {
-    Game.currentLevel(null);
+    levelRes.set(null);
     Point expectedFocusPoint = new Point(0, 0);
     cameraSystem.execute();
     assertEquals(expectedFocusPoint.x(), CameraSystem.camera().position.x, 0.001);
