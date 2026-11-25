@@ -34,6 +34,8 @@ import engine.utils.components.draw.TextureMap;
 import engine.utils.components.path.IPath;
 import engine.utils.settings.ClientSettings;
 import feature.systems.LevelEditorSystem;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.EnumMap;
@@ -49,6 +51,9 @@ import org.mockito.MockedStatic;
  * Isolated asset and graphics boundaries for rendering scenarios; production algorithms stay real.
  */
 final class RendererScenarioFixture {
+  private static final Method BEGIN_FRAME = findBeginFrame();
+  private static final boolean TAKES_LEVEL = BEGIN_FRAME.getParameterCount() == 5;
+
   final Graphics graphics = mock(Graphics.class);
   final OrthographicCamera camera = new OrthographicCamera(8, 6);
   final SpriteBatch batch = mock(SpriteBatch.class);
@@ -146,7 +151,7 @@ final class RendererScenarioFixture {
             invocation -> Optional.ofNullable(fixture.masks.get(invocation.getArgument(0))));
     // The editor creates its shared font before its static methods can be mocked.
     Gdx.gl = mock(GL20.class);
-    try (MockedStatic<Game> game = mockStatic(Game.class);
+    try (MockedStatic<Game> game = TAKES_LEVEL ? null : mockStatic(Game.class);
         MockedStatic<CameraSystem> cameras = mockStatic(CameraSystem.class);
         MockedStatic<ClientSettings> settings = mockStatic(ClientSettings.class);
         MockedStatic<LevelEditorSystem> editor = mockStatic(LevelEditorSystem.class);
@@ -182,9 +187,11 @@ final class RendererScenarioFixture {
                 })) {
       Gdx.graphics = fixture.graphics;
       Gdx.files = files;
-      game.when(Game::currentLevel)
-          .thenAnswer(
-              invocation -> fixture.levelLoaded ? Optional.of(fixture.level) : Optional.empty());
+      if (game != null) {
+        game.when(Game::currentLevel)
+            .thenAnswer(
+                invocation -> fixture.levelLoaded ? Optional.of(fixture.level) : Optional.empty());
+      }
       editor.when(LevelEditorSystem::active).thenAnswer(invocation -> fixture.editorMode);
       settings.when(ClientSettings::brightness).thenAnswer(invocation -> fixture.brightness);
       cameras.when(CameraSystem::camera).thenReturn(fixture.camera);
@@ -232,7 +239,34 @@ final class RendererScenarioFixture {
   }
 
   void begin(int width, int height, float delta, float time) {
-    renderer.beginFrame(width, height, delta, time);
+    try {
+      if (TAKES_LEVEL) {
+        BEGIN_FRAME.invoke(renderer, levelLoaded ? level : null, width, height, delta, time);
+      } else {
+        BEGIN_FRAME.invoke(renderer, width, height, delta, time);
+      }
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof RuntimeException failure) throw failure;
+      if (e.getCause() instanceof Error failure) throw failure;
+      throw new AssertionError(e.getCause());
+    } catch (IllegalAccessException e) {
+      throw new AssertionError(e);
+    }
+  }
+
+  private static Method findBeginFrame() {
+    // Development passes the level explicitly. Golden-copy still reads it through Game.
+    try {
+      return AtmosphereRenderer.class.getMethod(
+          "beginFrame", ILevel.class, int.class, int.class, float.class, float.class);
+    } catch (NoSuchMethodException explicitLevelUnavailable) {
+      try {
+        return AtmosphereRenderer.class.getMethod(
+            "beginFrame", int.class, int.class, float.class, float.class);
+      } catch (NoSuchMethodException e) {
+        throw new AssertionError("Unsupported AtmosphereRenderer.beginFrame signature", e);
+      }
+    }
   }
 
   void grade() {
