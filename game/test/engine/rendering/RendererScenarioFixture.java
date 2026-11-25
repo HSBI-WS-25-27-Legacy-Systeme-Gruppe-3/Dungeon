@@ -49,11 +49,13 @@ import org.mockito.MockedStatic;
  * Isolated asset and graphics boundaries for rendering scenarios; production algorithms stay real.
  */
 final class RendererScenarioFixture {
+  final Graphics graphics = mock(Graphics.class);
   final OrthographicCamera camera = new OrthographicCamera(8, 6);
   final SpriteBatch batch = mock(SpriteBatch.class);
   final FrameBufferPool pool = mock(FrameBufferPool.class);
   final ILevel level = mock(ILevel.class);
   final LevelRenderer tiles = new LevelRenderer();
+  final List<FrameBuffer> buffers = new ArrayList<>();
   final List<Light> lights = new ArrayList<>();
   final List<Upload> uploads = new ArrayList<>();
   final List<Texture> occlusionTextures = new ArrayList<>();
@@ -64,6 +66,9 @@ final class RendererScenarioFixture {
   private final Map<DesignLabel, DesignTileset> tilesets = new EnumMap<>(DesignLabel.class);
   Tile[][] layout = floors(3, 3);
   Atmosphere atmosphere = new Atmosphere(Color.BLACK, Color.WHITE, Color.WHITE, 0, 0, 0, false);
+  boolean levelLoaded = true;
+  boolean editorMode;
+  int brightness;
   boolean shaderCompiles = true;
   boolean decor = true;
   AtmosphereRenderer renderer;
@@ -83,7 +88,12 @@ final class RendererScenarioFixture {
         .when(level)
         .lights(any());
     when(pool.obtain(anyInt(), anyInt()))
-        .thenAnswer(invocation -> buffer(invocation.getArgument(0), invocation.getArgument(1)));
+        .thenAnswer(
+            invocation -> {
+              FrameBuffer buffer = buffer(invocation.getArgument(0), invocation.getArgument(1));
+              buffers.add(buffer);
+              return buffer;
+            });
     doAnswer(
             invocation -> {
               colors.add(new Color((Color) invocation.getArgument(0)));
@@ -111,14 +121,14 @@ final class RendererScenarioFixture {
     }
   }
 
-  static void run(boolean variants, boolean reduced, Consumer<RendererScenarioFixture> check) {
+  static RendererScenarioFixture run(
+      boolean variants, boolean reduced, Consumer<RendererScenarioFixture> check) {
     Graphics originalGraphics = Gdx.graphics;
     Files originalFiles = Gdx.files;
     GL20 originalGl = Gdx.gl;
     boolean originalPedantic = ShaderProgram.pedantic;
     RendererScenarioFixture fixture = new RendererScenarioFixture(variants);
-    Graphics graphics = mock(Graphics.class);
-    when(graphics.getBackBufferScale()).thenReturn(1f);
+    when(fixture.graphics.getBackBufferScale()).thenReturn(1f);
     Files files = mock(Files.class);
     when(files.internal(anyString()))
         .thenAnswer(
@@ -170,9 +180,13 @@ final class RendererScenarioFixture {
                       .when(texture)
                       .draw(any(Pixmap.class), anyInt(), anyInt());
                 })) {
-      Gdx.graphics = graphics;
+      Gdx.graphics = fixture.graphics;
       Gdx.files = files;
-      game.when(Game::currentLevel).thenReturn(Optional.of(fixture.level));
+      game.when(Game::currentLevel)
+          .thenAnswer(
+              invocation -> fixture.levelLoaded ? Optional.of(fixture.level) : Optional.empty());
+      editor.when(LevelEditorSystem::active).thenAnswer(invocation -> fixture.editorMode);
+      settings.when(ClientSettings::brightness).thenAnswer(invocation -> fixture.brightness);
       cameras.when(CameraSystem::camera).thenReturn(fixture.camera);
       settings.when(ClientSettings::reduceEffects).thenReturn(reduced);
       pools.when(FrameBufferPool::getInstance).thenReturn(fixture.pool);
@@ -210,10 +224,15 @@ final class RendererScenarioFixture {
       Gdx.gl = originalGl;
       ShaderProgram.pedantic = originalPedantic;
     }
+    return fixture;
   }
 
   void begin(float delta, float time) {
-    renderer.beginFrame(800, 600, delta, time);
+    begin(800, 600, delta, time);
+  }
+
+  void begin(int width, int height, float delta, float time) {
+    renderer.beginFrame(width, height, delta, time);
   }
 
   void grade() {
@@ -241,6 +260,14 @@ final class RendererScenarioFixture {
     return shaders.get("shaders/atmosphere/" + name);
   }
 
+  void clearShaderInvocations() {
+    shaders.values().forEach(org.mockito.Mockito::clearInvocations);
+  }
+
+  void verifyShadersDisposed() {
+    shaders.values().forEach(shader -> org.mockito.Mockito.verify(shader).dispose());
+  }
+
   static Tile[][] floors(int width, int height) {
     Tile[][] tiles = new Tile[height][width];
     for (int y = 0; y < height; y++)
@@ -253,7 +280,7 @@ final class RendererScenarioFixture {
     return new WallTile(new Coordinate(x, y), DesignLabel.DEFAULT);
   }
 
-  private static FrameBuffer buffer(int width, int height) {
+  static FrameBuffer buffer(int width, int height) {
     FrameBuffer buffer = mock(FrameBuffer.class);
     when(buffer.getWidth()).thenReturn(width);
     when(buffer.getHeight()).thenReturn(height);
