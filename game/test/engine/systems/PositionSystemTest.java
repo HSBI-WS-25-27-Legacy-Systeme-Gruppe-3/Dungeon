@@ -16,12 +16,13 @@ import engine.level.utils.LevelElement;
 import engine.utils.Point;
 import engine.utils.Tuple;
 import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import testingUtils.CleanGame;
 
 /** Tests for the {@link PositionSystem} class. */
+@CleanGame
 public class PositionSystemTest {
 
   private final Tile mock = Mockito.mock(FloorTile.class);
@@ -47,14 +48,6 @@ public class PositionSystemTest {
     Mockito.when(level.randomTile(LevelElement.FLOOR)).thenReturn(Optional.of(mock));
     Mockito.when(mock.position()).thenReturn(point);
     Mockito.when(mock.coordinate()).thenReturn(new Coordinate(3, 3));
-  }
-
-  /** Cleanup after each test. */
-  @AfterEach
-  public void cleanup() {
-    Game.currentLevel(null);
-    Game.removeAllSystems();
-    Game.removeAllEntities();
   }
 
   /** Test that the position is set to a random free tile if the position is illegal. */

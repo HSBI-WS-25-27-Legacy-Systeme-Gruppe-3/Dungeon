@@ -8,8 +8,10 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 
 /** Tests for the {@link System} class. */
+@CleanGame
 public class SystemTest {
   private final boolean[] onAdd = {false};
   private final boolean[] onRemove = {false};
@@ -28,11 +30,9 @@ public class SystemTest {
     testSystem.onEntityRemove = entity -> onRemove[0] = true;
   }
 
-  /** WTF? . */
+  /** Resets the callback flags after each test. */
   @AfterEach
   public void cleanup() {
-    Game.removeAllEntities();
-    Game.removeAllSystems();
     onAdd[0] = false;
     onRemove[0] = false;
   }

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import testingUtils.CleanGame;
 import testingUtils.MockNetworkHandler;
 
 /**
@@ -30,6 +31,7 @@ import testingUtils.MockNetworkHandler;
  * <p>Validates server initialization, lifecycle management, message broadcasting, and client
  * communication of the authoritative server transport.
  */
+@CleanGame
 public class ServerRuntimeTests {
 
   private static final List<ServerRuntime> runtimes = new ArrayList<>();

@@ -19,8 +19,10 @@ import feature.components.FlyComponent;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 
 /** Unit tests for the {@link engine.systems.FrictionSystem}. */
+@CleanGame
 public class FrictionSystemTest {
 
   private FrictionSystem system;
@@ -40,7 +42,6 @@ public class FrictionSystemTest {
     entity.add(vc);
     entity.add(pc);
 
-    Game.removeAllEntities();
     Game.add(entity);
 
     pc.position(new Point(5, 5));

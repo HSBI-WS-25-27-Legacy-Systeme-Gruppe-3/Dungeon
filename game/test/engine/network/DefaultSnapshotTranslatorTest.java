@@ -24,16 +24,15 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 
 /** Tests for {@link DefaultSnapshotTranslator}. */
+@CleanGame
 public class DefaultSnapshotTranslatorTest {
 
-  /** Cleans global game state after each test. */
+  /** Resets the network configuration after each test. */
   @AfterEach
   public void cleanup() {
-    Game.removeAllEntities();
-    Game.removeAllSystems();
-    Game.currentLevel(null);
     PreRunConfiguration.multiplayerEnabled(false);
     PreRunConfiguration.isNetworkServer(true);
   }

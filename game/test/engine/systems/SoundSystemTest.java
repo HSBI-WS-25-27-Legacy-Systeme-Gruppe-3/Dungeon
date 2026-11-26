@@ -25,8 +25,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 
 /** Tests for the {@link SoundSystem} class. */
+@CleanGame
 public class SoundSystemTest {
 
   private SoundSystem soundSystem;
@@ -46,8 +48,6 @@ public class SoundSystemTest {
 
   @AfterEach
   void cleanup() {
-    Game.removeAllEntities();
-    Game.removeAllSystems();
     if (Game.soundPlayer() != null) {
       Game.soundPlayer().dispose();
     }
