@@ -4,11 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import engine.level.elements.ILevel;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import testingUtils.CleanGame;
 
 /** Tests for the {@link Changes} tracker. */
+@CleanGame
 public class ChangesTest {
 
   /**
@@ -17,12 +18,6 @@ public class ChangesTest {
    * @param value an arbitrary value to tell instances apart
    */
   private record Counter(int value) {}
-
-  /** Resets the global registry. */
-  @AfterEach
-  public void cleanup() {
-    Resources.clear();
-  }
 
   /** The first check always reports a change. */
   @Test
