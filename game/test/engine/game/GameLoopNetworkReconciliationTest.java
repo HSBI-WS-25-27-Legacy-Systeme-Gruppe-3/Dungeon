@@ -58,8 +58,6 @@ public class GameLoopNetworkReconciliationTest {
   /** A repeated server show preserves the local dialog and its current presentation state. */
   @Test
   public void repeatedDialogShowKeepsOneInstanceUntilServerClose() throws Exception {
-    Game.removeAllEntities();
-    Game.removeAllSystems();
     MockNetworkHandler.useLocalNetworkHandler();
     PreRunConfiguration.multiplayerEnabled(true);
     PreRunConfiguration.isNetworkServer(false);
