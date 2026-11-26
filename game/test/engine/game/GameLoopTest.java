@@ -1,32 +1,43 @@
 package engine.game;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.mockStatic;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import engine.network.ConnectionListener;
-import engine.utils.IVoidFunction;
-import engine.level.loader.LevelParser;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import engine.Game;
 import engine.level.DungeonLevel;
+import engine.level.loader.DungeonLoader;
+import engine.level.loader.LevelParser;
+import engine.network.ConnectionListener;
 import engine.network.MessageDispatcher;
+import engine.network.handler.INetworkHandler;
 import engine.network.messages.s2c.LevelChangeEvent;
 import engine.network.server.ClientState;
 import engine.network.server.Session;
-import engine.network.handler.INetworkHandler;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import engine.Game;
+import engine.utils.FontHelper;
+import engine.utils.IVoidFunction;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
 class GameLoopTest {
@@ -203,16 +214,12 @@ class GameLoopTest {
 
     INetworkHandler network = mock(INetworkHandler.class);
 
-    when(network.send(
-        eq((short) 0),
-        any(),
-        eq(true)))
+    when(network.send(eq((short) 0), any(), eq(true)))
         .thenReturn(CompletableFuture.completedFuture(false));
 
     try (MockedStatic<Game> game = mockStatic(Game.class)) {
       game.when(Game::isMultiplayerClient).thenReturn(true);
-      game.when(Game::player)
-          .thenReturn(Optional.of(mock(engine.Entity.class)));
+      game.when(Game::player).thenReturn(Optional.of(mock(engine.Entity.class)));
       game.when(Game::network).thenReturn(network);
 
       method.invoke(gameLoop);
@@ -247,8 +254,7 @@ class GameLoopTest {
 
     try (MockedStatic<Game> game = mockStatic(Game.class)) {
       game.when(Game::isMultiplayerClient).thenReturn(true);
-      game.when(Game::player)
-          .thenReturn(Optional.of(mock(engine.Entity.class)));
+      game.when(Game::player).thenReturn(Optional.of(mock(engine.Entity.class)));
       game.when(Game::network).thenReturn(network);
 
       method.invoke(gameLoop);
@@ -266,8 +272,7 @@ class GameLoopTest {
     constructor.setAccessible(true);
     GameLoop gameLoop = constructor.newInstance();
 
-    Method method = GameLoop.class.getDeclaredMethod(
-        "multiplayerDisconnectReason", String.class);
+    Method method = GameLoop.class.getDeclaredMethod("multiplayerDisconnectReason", String.class);
     method.setAccessible(true);
 
     String reason = "Connection lost";
@@ -283,8 +288,7 @@ class GameLoopTest {
     constructor.setAccessible(true);
     GameLoop gameLoop = constructor.newInstance();
 
-    Method method = GameLoop.class.getDeclaredMethod(
-        "multiplayerDisconnectReason", String.class);
+    Method method = GameLoop.class.getDeclaredMethod("multiplayerDisconnectReason", String.class);
     method.setAccessible(true);
 
     String message = (String) method.invoke(gameLoop, (String) null);
@@ -344,8 +348,7 @@ class GameLoopTest {
       game.when(Game::network).thenReturn(network);
       game.when(Game::player).thenReturn(Optional.empty());
 
-      levelParser.when(() -> LevelParser.parseLevel("", "test-level"))
-          .thenReturn(level);
+      levelParser.when(() -> LevelParser.parseLevel("", "test-level")).thenReturn(level);
 
       Method setupHandlers = GameLoop.class.getDeclaredMethod("setupMessageHandlers");
       setupHandlers.setAccessible(true);
@@ -377,8 +380,7 @@ class GameLoopTest {
     try (MockedStatic<PreRunConfiguration> configuration = mockStatic(PreRunConfiguration.class);
         MockedStatic<Game> game = mockStatic(Game.class)) {
 
-      configuration.when(PreRunConfiguration::multiplayerEnabled)
-          .thenReturn(true);
+      configuration.when(PreRunConfiguration::multiplayerEnabled).thenReturn(true);
       game.when(Game::isMultiplayerClient).thenReturn(false);
 
       // setup() beginnt, wird aber später durch fehlende
@@ -408,10 +410,8 @@ class GameLoopTest {
     try (MockedStatic<PreRunConfiguration> configuration = mockStatic(PreRunConfiguration.class);
         MockedStatic<Game> game = mockStatic(Game.class)) {
 
-      configuration.when(PreRunConfiguration::multiplayerEnabled)
-          .thenReturn(true);
-      configuration.when(PreRunConfiguration::userOnSetup)
-          .thenReturn(onSetup);
+      configuration.when(PreRunConfiguration::multiplayerEnabled).thenReturn(true);
+      configuration.when(PreRunConfiguration::userOnSetup).thenReturn(onSetup);
 
       game.when(Game::isMultiplayerClient).thenReturn(false);
       game.when(Game::isHeadless).thenReturn(true);
@@ -439,10 +439,8 @@ class GameLoopTest {
     try (MockedStatic<PreRunConfiguration> configuration = mockStatic(PreRunConfiguration.class);
         MockedStatic<Game> game = mockStatic(Game.class)) {
 
-      configuration.when(PreRunConfiguration::multiplayerEnabled)
-          .thenReturn(true);
-      configuration.when(PreRunConfiguration::userOnSetup)
-          .thenReturn(onSetup);
+      configuration.when(PreRunConfiguration::multiplayerEnabled).thenReturn(true);
+      configuration.when(PreRunConfiguration::userOnSetup).thenReturn(onSetup);
 
       game.when(Game::isMultiplayerClient).thenReturn(false);
       game.when(Game::isHeadless).thenReturn(true);
@@ -455,29 +453,46 @@ class GameLoopTest {
     }
   }
 
-  private ConnectionListener createConnectionListener(GameLoop gameLoop)
-      throws Exception {
+  private ConnectionListener createConnectionListener(GameLoop gameLoop) throws Exception {
+    INetworkHandler network = mock(INetworkHandler.class);
+    when(network.messageDispatcher()).thenReturn(new MessageDispatcher());
+    Method setupClient = GameLoop.class.getDeclaredMethod("setupClient");
+    setupClient.setAccessible(true);
+    Field stage = GameLoop.class.getDeclaredField("stage");
+    stage.setAccessible(true);
+    Object previousStage = stage.get(null);
+    Input previousInput = Gdx.input;
 
-    for (int i = 1; i <= 20; i++) {
-      Class<?> listenerClass;
+    // Keep client initialization real, replacing only external rendering, controller,
+    // and global registration dependencies required by the headless environment.
+    try (MockedStatic<Game> game = mockStatic(Game.class);
+        MockedStatic<PreRunConfiguration> configuration =
+            mockStatic(PreRunConfiguration.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+        MockedStatic<ECSManagement> ecs = mockStatic(ECSManagement.class);
+        MockedStatic<DungeonLoader> levels = mockStatic(DungeonLoader.class);
+        MockedStatic<Controllers> controllers = mockStatic(Controllers.class);
+        MockedStatic<WindowEventManager> windows = mockStatic(WindowEventManager.class);
+        MockedStatic<FontHelper> fonts = mockStatic(FontHelper.class);
+        var batches = mockConstruction(SpriteBatch.class);
+        var shapes = mockConstruction(ShapeRenderer.class);
+        var stages = mockConstruction(Stage.class)) {
+      Gdx.input = mock(Input.class);
+      game.when(Game::network).thenReturn(network);
+      game.when(Game::windowWidth).thenReturn(1280);
+      game.when(Game::windowHeight).thenReturn(720);
+      configuration.when(PreRunConfiguration::multiplayerEnabled).thenReturn(true);
+      fonts.when(FontHelper::getDefaultFont).thenReturn(mock(BitmapFont.class));
 
-      try {
-        listenerClass = Class.forName("engine.game.GameLoop$" + i);
-      } catch (ClassNotFoundException e) {
-        continue;
-      }
+      setupClient.invoke(gameLoop);
 
-      if (!ConnectionListener.class.isAssignableFrom(listenerClass)) {
-        continue;
-      }
-
-      Constructor<?> constructor = listenerClass.getDeclaredConstructor(GameLoop.class);
-      constructor.setAccessible(true);
-
-      return (ConnectionListener) constructor.newInstance(gameLoop);
+      ArgumentCaptor<ConnectionListener> listener =
+          ArgumentCaptor.forClass(ConnectionListener.class);
+      verify(network).addConnectionListener(listener.capture());
+      return listener.getValue();
+    } finally {
+      Gdx.input = previousInput;
+      stage.set(null, previousStage);
     }
-
-    throw new IllegalStateException("ConnectionListener nicht gefunden");
   }
 
   @Test

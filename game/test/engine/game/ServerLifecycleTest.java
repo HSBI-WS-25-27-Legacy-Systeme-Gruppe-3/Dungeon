@@ -1,9 +1,9 @@
 package engine.game;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import engine.Game;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +17,8 @@ class ServerLifecycleTest {
     AtomicInteger callbackCount = new AtomicInteger();
 
     try (MockedStatic<Game> game = mockStatic(Game.class)) {
-      ServerLifecycle lifecycle = ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
+      ServerLifecycle lifecycle =
+          ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
 
       lifecycle.requestExit("First shutdown");
       lifecycle.requestExit("Second shutdown");
@@ -35,11 +36,10 @@ class ServerLifecycleTest {
       game.when(() -> Game.exit("Shutdown"))
           .thenThrow(new IllegalStateException("Shutdown failed"));
 
-      ServerLifecycle lifecycle = ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
+      ServerLifecycle lifecycle =
+          ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
 
-      assertThrows(
-          IllegalStateException.class,
-          () -> lifecycle.requestExit("Shutdown"));
+      assertThrows(IllegalStateException.class, () -> lifecycle.requestExit("Shutdown"));
 
       assertEquals(1, callbackCount.get());
     }
@@ -50,7 +50,8 @@ class ServerLifecycleTest {
     AtomicInteger callbackCount = new AtomicInteger();
 
     try (MockedStatic<Game> game = mockStatic(Game.class)) {
-      ServerLifecycle lifecycle = ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
+      ServerLifecycle lifecycle =
+          ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
 
       lifecycle.requestCompletion();
       lifecycle.requestCompletion();
@@ -65,7 +66,8 @@ class ServerLifecycleTest {
     AtomicInteger callbackCount = new AtomicInteger();
 
     try (MockedStatic<Game> game = mockStatic(Game.class)) {
-      ServerLifecycle lifecycle = ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
+      ServerLifecycle lifecycle =
+          ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
 
       lifecycle.requestCompletion();
       lifecycle.requestExit("Shutdown");
@@ -82,7 +84,8 @@ class ServerLifecycleTest {
     AtomicInteger callbackCount = new AtomicInteger();
 
     try (MockedStatic<Game> game = mockStatic(Game.class)) {
-      ServerLifecycle lifecycle = ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
+      ServerLifecycle lifecycle =
+          ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
 
       lifecycle.requestExit("Shutdown");
       lifecycle.requestCompletion();
@@ -99,14 +102,12 @@ class ServerLifecycleTest {
     AtomicInteger callbackCount = new AtomicInteger();
 
     try (MockedStatic<Game> game = mockStatic(Game.class)) {
-      game.when(Game::complete)
-          .thenThrow(new IllegalStateException("Completion failed"));
+      game.when(Game::complete).thenThrow(new IllegalStateException("Completion failed"));
 
-      ServerLifecycle lifecycle = ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
+      ServerLifecycle lifecycle =
+          ServerLifecycle.install("Server stopped", callbackCount::incrementAndGet);
 
-      assertThrows(
-          IllegalStateException.class,
-          lifecycle::requestCompletion);
+      assertThrows(IllegalStateException.class, lifecycle::requestCompletion);
 
       assertEquals(1, callbackCount.get());
 

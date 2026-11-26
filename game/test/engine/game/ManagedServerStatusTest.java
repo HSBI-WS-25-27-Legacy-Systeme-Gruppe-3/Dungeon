@@ -1,12 +1,12 @@
 package engine.game;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockConstruction;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -15,9 +15,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
-import org.mockito.MockedConstruction;
-
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
 
 class ManagedServerStatusTest {
 
@@ -93,11 +92,13 @@ class ManagedServerStatusTest {
     String previousManaged = System.getProperty(ServerProcess.MANAGED_PROPERTY);
     String previousPort = System.getProperty(ServerProcess.STATUS_PORT_PROPERTY);
 
-    try (MockedConstruction<Socket> sockets = mockConstruction(
-        Socket.class,
-        (socket, context) -> doThrow(new IOException("Connection refused"))
-            .when(socket)
-            .connect(any(SocketAddress.class), anyInt()))) {
+    try (MockedConstruction<Socket> sockets =
+        mockConstruction(
+            Socket.class,
+            (socket, context) ->
+                doThrow(new IOException("Connection refused"))
+                    .when(socket)
+                    .connect(any(SocketAddress.class), anyInt()))) {
 
       System.setProperty(ServerProcess.MANAGED_PROPERTY, "true");
       System.setProperty(ServerProcess.STATUS_PORT_PROPERTY, "12345");
@@ -127,9 +128,10 @@ class ManagedServerStatusTest {
 
     ByteArrayOutputStream sentBytes = new ByteArrayOutputStream();
 
-    try (MockedConstruction<Socket> sockets = mockConstruction(
-        Socket.class,
-        (socket, context) -> when(socket.getOutputStream()).thenReturn(sentBytes))) {
+    try (MockedConstruction<Socket> sockets =
+        mockConstruction(
+            Socket.class,
+            (socket, context) -> when(socket.getOutputStream()).thenReturn(sentBytes))) {
 
       System.setProperty(ServerProcess.MANAGED_PROPERTY, "true");
       System.setProperty(ServerProcess.STATUS_PORT_PROPERTY, "12345");
@@ -138,8 +140,8 @@ class ManagedServerStatusTest {
 
       assertEquals(1, sockets.constructed().size());
 
-      try (DataInputStream input = new DataInputStream(
-          new ByteArrayInputStream(sentBytes.toByteArray()))) {
+      try (DataInputStream input =
+          new DataInputStream(new ByteArrayInputStream(sentBytes.toByteArray()))) {
         assertEquals("Server ready", input.readUTF());
       }
     } finally {
@@ -162,10 +164,11 @@ class ManagedServerStatusTest {
     String previousManaged = System.getProperty(ServerProcess.MANAGED_PROPERTY);
     String previousPort = System.getProperty(ServerProcess.STATUS_PORT_PROPERTY);
 
-    try (MockedConstruction<Socket> sockets = mockConstruction(
-        Socket.class,
-        (socket, context) -> when(socket.getOutputStream())
-            .thenReturn(new ByteArrayOutputStream()))) {
+    try (MockedConstruction<Socket> sockets =
+        mockConstruction(
+            Socket.class,
+            (socket, context) ->
+                when(socket.getOutputStream()).thenReturn(new ByteArrayOutputStream()))) {
 
       System.setProperty(ServerProcess.MANAGED_PROPERTY, "true");
       System.setProperty(ServerProcess.STATUS_PORT_PROPERTY, "12345");

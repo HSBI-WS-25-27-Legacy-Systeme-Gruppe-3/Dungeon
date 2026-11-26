@@ -1,20 +1,18 @@
 package engine.game;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-
-import static org.mockito.Mockito.verify;
-
 import org.junit.jupiter.api.Test;
 
 class HostSessionTest {
@@ -118,8 +116,7 @@ class HostSessionTest {
   void shutdownFailureIsPropagated() {
     ServerProcess process = mock(ServerProcess.class);
 
-    doThrow(new IllegalStateException("Shutdown failed"))
-        .when(process).stop();
+    doThrow(new IllegalStateException("Shutdown failed")).when(process).stop();
 
     HostSession.hosting(process);
 
