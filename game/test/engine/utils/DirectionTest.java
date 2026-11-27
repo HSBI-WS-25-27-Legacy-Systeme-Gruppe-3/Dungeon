@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.Resources;
 
 /**
  * Tests for the {@link Direction} enum.
@@ -206,6 +209,27 @@ public class DirectionTest {
     String[] cases = {"up", "UP", "Up", "uP"};
     for (String testCase : cases) {
       assertEquals(Direction.UP, Direction.fromString(testCase));
+    }
+  }
+
+  /** Tests direction parsing with a Turkish default locale. */
+  @Test
+  @ResourceLock(Resources.LOCALE)
+  public void testFromStringWithTurkishLocale() {
+    Locale originalLocale = Locale.getDefault();
+    Locale originalDisplay = Locale.getDefault(Locale.Category.DISPLAY);
+    Locale originalFormat = Locale.getDefault(Locale.Category.FORMAT);
+
+    try {
+      Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+
+      assertEquals(Direction.RIGHT, Direction.fromString("right"));
+      assertEquals(Direction.RIGHT, Direction.fromString("Right"));
+      assertEquals(Direction.RIGHT, Direction.fromString("RIGHT"));
+    } finally {
+      Locale.setDefault(originalLocale);
+      Locale.setDefault(Locale.Category.DISPLAY, originalDisplay);
+      Locale.setDefault(Locale.Category.FORMAT, originalFormat);
     }
   }
 
