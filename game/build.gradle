@@ -247,6 +247,32 @@ tasks.named('test', Test) {
     useJUnitPlatform()
 }
 
+// Runs the engine tests three times in random order to find tests that depend on each other.
+// Every run prints its seed. Repeat a run with: ./gradlew :game:engineTestRandom1 -Pseed=<seed>
+def engineTestRandomRuns = (1..3).collect { run ->
+    tasks.register("engineTestRandom$run", Test) {
+        group = 'verification'
+        description = "Runs the engine tests in random order (run $run of 3)."
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+        useJUnitPlatform()
+        filter { includeTestsMatching 'engine.*' }
+
+        def seed = project.findProperty('seed') ?: new Random().nextLong().toString()
+        systemProperty 'junit.jupiter.testclass.order.default', 'org.junit.jupiter.api.ClassOrderer$Random'
+        systemProperty 'junit.jupiter.testmethod.order.default', 'org.junit.jupiter.api.MethodOrderer$Random'
+        systemProperty 'junit.jupiter.execution.order.random.seed', seed
+        outputs.upToDateWhen { false }
+        doFirst { logger.lifecycle("Engine tests run $run uses seed $seed") }
+    }
+}
+
+tasks.register('engineTestRandom') {
+    group = 'verification'
+    description = 'Runs the engine tests three times in random order with different seeds.'
+    dependsOn engineTestRandomRuns
+}
+
 tasks.named('checkstyleMain') {
     exclude 'build/generated/source/proto/**'
     exclude '**/engine/network/proto/**'
