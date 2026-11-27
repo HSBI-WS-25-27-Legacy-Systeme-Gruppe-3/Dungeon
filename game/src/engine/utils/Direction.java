@@ -1,5 +1,6 @@
 package engine.utils;
 
+import java.util.Locale;
 import java.util.Random;
 
 /**
@@ -133,9 +134,9 @@ public enum Direction implements Vector2 {
    * @throws IllegalArgumentException if the string does not match any direction.
    */
   public static Direction fromString(String direction) {
-    String lowerCaseDirection = direction.toLowerCase();
+    String lowerCaseDirection = direction.toLowerCase(Locale.ROOT);
     for (Direction dir : values()) {
-      if (dir.name().toLowerCase().equals(lowerCaseDirection)) {
+      if (dir.name().toLowerCase(Locale.ROOT).equals(lowerCaseDirection)) {
         return dir;
       }
     }
