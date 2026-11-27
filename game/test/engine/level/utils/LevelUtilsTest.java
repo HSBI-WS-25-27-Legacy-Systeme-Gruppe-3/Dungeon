@@ -3,18 +3,16 @@ package engine.level.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import engine.Game;
-import engine.level.DungeonLevel;
-import engine.systems.LevelSystem;
 import engine.utils.Point;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.TestLevels;
 
 /** Tests for the {@link LevelUtils} class. */
 public class LevelUtilsTest {
 
-  // default layout is:
+  // layout of the test level "exit_room":
   //
   // W W W W W
   // W F F F W
@@ -25,54 +23,13 @@ public class LevelUtilsTest {
   /** WTF? . */
   @BeforeEach
   public void setup() {
-    Game.add(new LevelSystem());
-
-    Game.currentLevel(
-        new DungeonLevel(
-            new LevelElement[][] {
-              new LevelElement[] {
-                LevelElement.WALL,
-                LevelElement.WALL,
-                LevelElement.WALL,
-                LevelElement.WALL,
-                LevelElement.WALL,
-              },
-              new LevelElement[] {
-                LevelElement.WALL,
-                LevelElement.FLOOR,
-                LevelElement.FLOOR,
-                LevelElement.FLOOR,
-                LevelElement.WALL,
-              },
-              new LevelElement[] {
-                LevelElement.WALL,
-                LevelElement.FLOOR,
-                LevelElement.EXIT,
-                LevelElement.FLOOR,
-                LevelElement.WALL,
-              },
-              new LevelElement[] {
-                LevelElement.WALL,
-                LevelElement.FLOOR,
-                LevelElement.FLOOR,
-                LevelElement.FLOOR,
-                LevelElement.WALL,
-              },
-              new LevelElement[] {
-                LevelElement.WALL,
-                LevelElement.WALL,
-                LevelElement.WALL,
-                LevelElement.WALL,
-                LevelElement.WALL,
-              }
-            },
-            DesignLabel.DEFAULT));
+    TestLevels.load("exit_room");
   }
 
   /** WTF? . */
   @AfterEach
   public void cleanup() {
-    Game.removeAllSystems();
+    TestLevels.unload();
   }
 
   /** WTF? . */
