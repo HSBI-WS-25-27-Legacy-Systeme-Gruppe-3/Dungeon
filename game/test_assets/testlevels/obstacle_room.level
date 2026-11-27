@@ -1,0 +1,15 @@
+{
+  "version" : 3,
+  "design" : "DEFAULT",
+  "layout" : [
+    "WWWWWWW",
+    "WFFFFFW",
+    "WFFWFFW",
+    "WFFFFFW",
+    "WWWWWWW"
+  ],
+  "startTiles" : [ { "x" : 1.0, "y" : 2.0 } ],
+  "namedPoints" : { },
+  "decorations" : [ ],
+  "prefabs" : [ ]
+}
