@@ -15,8 +15,8 @@ import java.util.function.Consumer;
 /**
  * Setzt vor jedem Test die global registrierten Callbacks, Listener und Strategien zurück: die
  * Nutzer-Callbacks in {@link PreRunConfiguration} werden geleert, die Fenster-Listener und die
- * Eingabe-Handler entfernt und die Netzwerk-Strategien auf ihre Standardimplementierung gesetzt. Die
- * vorher gesetzten Callbacks und Strategien werden nach dem Test wiederhergestellt.
+ * Eingabe-Handler entfernt und die Netzwerk-Strategien auf ihre Standardimplementierung gesetzt.
+ * Die vorher gesetzten Callbacks und Strategien werden nach dem Test wiederhergestellt.
  */
 public final class CallbackReset {
 
