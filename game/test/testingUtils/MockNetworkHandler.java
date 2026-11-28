@@ -33,6 +33,21 @@ public final class MockNetworkHandler {
   }
 
   /**
+   * Returns the current network handler without throwing if none is set.
+   *
+   * @return the current handler, or {@code null} if none is set
+   */
+  public static INetworkHandler current() {
+    try {
+      Field handlerField = Game.class.getDeclaredField("networkHandler");
+      handlerField.setAccessible(true);
+      return (INetworkHandler) handlerField.get(null);
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      return fail("Failed to read network handler via reflection: " + e.getMessage());
+    }
+  }
+
+  /**
    * Changes the current {@link Game#network() NetworkHandler} to a given {@link INetworkHandler}
    * for testing.
    *
