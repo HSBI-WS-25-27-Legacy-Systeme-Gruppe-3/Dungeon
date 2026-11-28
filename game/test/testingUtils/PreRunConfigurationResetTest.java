@@ -22,12 +22,14 @@ class PreRunConfigurationResetTest {
   private boolean multiplayerEnabled;
   private boolean networkServer;
   private Optional<CharacterClass> characterClass;
+  private Map<String, CharacterClass> assignments;
 
   @BeforeEach
   void setUp() {
     multiplayerEnabled = PreRunConfiguration.multiplayerEnabled();
     networkServer = PreRunConfiguration.isNetworkServer();
     characterClass = PreRunConfiguration.multiplayerCharacterClass();
+    assignments = CharacterSelection.assignments();
 
     PreRunConfiguration.multiplayerEnabled(true);
     PreRunConfiguration.isNetworkServer(false);
@@ -40,7 +42,7 @@ class PreRunConfigurationResetTest {
     PreRunConfiguration.multiplayerEnabled(multiplayerEnabled);
     PreRunConfiguration.isNetworkServer(networkServer);
     PreRunConfiguration.multiplayerCharacterClass(characterClass.orElse(null));
-    CharacterSelection.clear();
+    CharacterSelection.restoreAssignments(assignments);
   }
 
   @Test
