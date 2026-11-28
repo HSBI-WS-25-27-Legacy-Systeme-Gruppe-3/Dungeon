@@ -26,12 +26,12 @@ import engine.utils.Tuple;
 import engine.utils.components.draw.TextureMap;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import testingUtils.CleanGame;
 
 /**
  * Unit tests for the {@link LevelSystem} class.
@@ -39,6 +39,7 @@ import org.mockito.Mockito;
  * <p>This class tests loading levels, executing the level system, handling player movement on end
  * tiles, and ensuring proper callbacks are triggered.
  */
+@CleanGame
 public class LevelSystemTest {
 
   private LevelSystem api;
@@ -46,12 +47,6 @@ public class LevelSystemTest {
   private ILevel level;
 
   private MockedConstruction<Texture> textureMockedConstruction;
-
-  /** Clears all levels from the DungeonLoader before all tests. */
-  @BeforeAll
-  public static void beforeAll() {
-    DungeonLoader.clearLevels();
-  }
 
   /**
    * Sets up mocks and initializes the LevelSystem before each test.
@@ -77,18 +72,9 @@ public class LevelSystemTest {
     Game.add(api);
   }
 
-  /**
-   * Cleans up after each test.
-   *
-   * <p>Removes the current level, all entities, and systems from the game, and closes any mocked
-   * constructions.
-   */
+  /** Closes the mocked texture construction after each test. */
   @AfterEach
   public void cleanup() {
-    Game.currentLevel(null);
-    DungeonLoader.clearLevels();
-    Game.removeAllEntities();
-    Game.removeAllSystems();
     textureMockedConstruction.close();
   }
 

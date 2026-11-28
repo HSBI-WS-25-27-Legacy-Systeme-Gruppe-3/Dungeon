@@ -17,8 +17,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import testingUtils.CleanGame;
 
 /** Tests for the {@link CameraSystem} class. */
+@CleanGame
 public class CameraSystemTest {
 
   private static final Point testPoint = new Point(3, 3);
@@ -39,12 +41,9 @@ public class CameraSystemTest {
     Mockito.when(level.startTile()).thenReturn(Optional.of(startTile));
   }
 
-  /** WTF? . */
+  /** Resets the camera after each test. */
   @AfterEach
   public void cleanup() {
-    Game.removeAllEntities();
-    Game.removeAllSystems();
-    // reset Camera
     CameraSystem.camera().viewportWidth = CameraSystem.viewportWidth();
     CameraSystem.camera().viewportHeight = CameraSystem.viewportHeight();
     CameraSystem.camera().position.set(0, 0, 0);

@@ -4,12 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import testingUtils.CleanGame;
 
 /** Tests for the {@link Entity} class. */
+@CleanGame
 public class EntityTest {
 
   private final Component testComponent = Mockito.mock(Component.class);
@@ -88,13 +89,6 @@ public class EntityTest {
 
     assertTrue(entity2.id() > entity1.id());
     assertTrue(entity2.compareTo(entity1) > 0);
-  }
-
-  /** Gets called after each @Test and cleans up any Entity left in game. */
-  @AfterEach
-  public void tearDown() {
-    Game.removeAllEntities();
-    Game.removeAllSystems();
   }
 
   private static final class TestComponent implements Component {}

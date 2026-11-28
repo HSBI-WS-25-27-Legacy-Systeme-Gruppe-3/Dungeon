@@ -12,12 +12,13 @@ import engine.utils.Direction;
 import engine.utils.Point;
 import engine.utils.TriConsumer;
 import engine.utils.Vector2;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 import testingUtils.SimpleCounter;
 
 /** WTF? . */
+@CleanGame
 public class CollisionSystemTest {
 
   private static final String DIRECTION_MESSAGE = "The Direction of the Collision should be.";
@@ -29,19 +30,6 @@ public class CollisionSystemTest {
       "PositionComponent did get removed Test no longer valid";
 
   private CollisionSystem cs;
-
-  /**
-   * Helper to clean up used Class Attributes to avoid interfering with other tests.
-   *
-   * <p>all Systems add themselves to the Class Attribute SystemController of the Game. To Check the
-   * correct processing of the CollisionSystemController the entities are added to the entities
-   * list.
-   */
-  private static void cleanUpEnvironment() {
-    Game.removeAllEntities();
-    Game.currentLevel(null);
-    Game.removeAllSystems();
-  }
 
   /** Creating a clean Systemcontroller to avoid interferences. */
   @BeforeEach
@@ -60,12 +48,6 @@ public class CollisionSystemTest {
     Entity e1 = new Entity();
     e1.add(new PositionComponent(point1));
     return e1;
-  }
-
-  /** WTF? . */
-  @AfterEach
-  public void cleanup() {
-    cleanUpEnvironment();
   }
 
   /**
@@ -96,7 +78,6 @@ public class CollisionSystemTest {
 
     assertTrue(cs.checkForCollision(hb1, hb2));
     assertEquals(Direction.RIGHT, cs.checkDirectionOfCollision(hb1.collider(), hb2.collider()));
-    cleanUpEnvironment();
   }
 
   /**
@@ -130,7 +111,6 @@ public class CollisionSystemTest {
 
     assertFalse(cs.checkForCollision(hb1, hb2));
     assertEquals(Direction.RIGHT, cs.checkDirectionOfCollision(hb1.collider(), hb2.collider()));
-    cleanUpEnvironment();
   }
 
   /**
@@ -161,7 +141,6 @@ public class CollisionSystemTest {
 
     assertTrue(cs.checkForCollision(hb1, hb2));
     assertEquals(Direction.LEFT, cs.checkDirectionOfCollision(hb1.collider(), hb2.collider()));
-    cleanUpEnvironment();
   }
 
   /**
@@ -195,7 +174,6 @@ public class CollisionSystemTest {
 
     assertFalse(cs.checkForCollision(hb1, hb2));
     assertEquals(Direction.LEFT, cs.checkDirectionOfCollision(hb1.collider(), hb2.collider()));
-    cleanUpEnvironment();
   }
 
   /**
@@ -225,7 +203,6 @@ public class CollisionSystemTest {
 
     assertTrue(cs.checkForCollision(hb1, hb2));
     assertEquals(Direction.UP, cs.checkDirectionOfCollision(hb1.collider(), hb2.collider()));
-    cleanUpEnvironment();
   }
 
   /**
@@ -256,7 +233,6 @@ public class CollisionSystemTest {
 
     assertFalse(cs.checkForCollision(hb1, hb2));
     assertEquals(Direction.UP, cs.checkDirectionOfCollision(hb1.collider(), hb2.collider()));
-    cleanUpEnvironment();
   }
 
   /**
@@ -286,7 +262,6 @@ public class CollisionSystemTest {
 
     assertTrue(cs.checkForCollision(hb1, hb2));
     assertEquals(Direction.DOWN, cs.checkDirectionOfCollision(hb1.collider(), hb2.collider()));
-    cleanUpEnvironment();
   }
 
   /**
@@ -317,7 +292,6 @@ public class CollisionSystemTest {
 
     assertFalse(cs.checkForCollision(hb1, hb2));
     assertEquals(Direction.DOWN, cs.checkDirectionOfCollision(hb1.collider(), hb2.collider()));
-    cleanUpEnvironment();
   }
 
   /**
@@ -342,7 +316,6 @@ public class CollisionSystemTest {
     Game.add(e1);
     Game.add(e2);
     assertTrue(cs.checkForCollision(hb1, hb2));
-    cleanUpEnvironment();
   }
 
   /**
@@ -367,14 +340,12 @@ public class CollisionSystemTest {
     Game.add(e1);
     Game.add(e2);
     assertTrue(cs.checkForCollision(hb1, hb2));
-    cleanUpEnvironment();
   }
 
   /** Checks if the System is still Working even if there is no Entity. */
   @Test
   public void checkUpdateNoEntities() {
     cs.execute();
-    cleanUpEnvironment();
   }
 
   /** Checks that the System is still working when there is no Entity with A hit box component. */
@@ -382,7 +353,6 @@ public class CollisionSystemTest {
   public void checkUpdateNoEntitiesWithHitboxComponent() {
     prepareEntityWithPosition(new Point(0, 0));
     cs.execute();
-    cleanUpEnvironment();
   }
 
   /**
@@ -402,7 +372,6 @@ public class CollisionSystemTest {
     cs.execute();
     assertEquals(0, sc1OnEnter.getCount());
     assertEquals(0, sc1OnLeave.getCount());
-    cleanUpEnvironment();
   }
 
   /** Checks that there is no call off the collider Methods when there is no Collision. */
@@ -431,8 +400,6 @@ public class CollisionSystemTest {
     assertEquals(0, sc1OnLeave.getCount());
     assertEquals(0, sc2OnEnter.getCount());
     assertEquals(0, sc2OnLeave.getCount());
-
-    cleanUpEnvironment();
   }
 
   //  /**

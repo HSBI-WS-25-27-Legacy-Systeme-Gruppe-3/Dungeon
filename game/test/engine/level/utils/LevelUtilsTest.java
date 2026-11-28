@@ -7,11 +7,12 @@ import engine.Game;
 import engine.level.DungeonLevel;
 import engine.systems.LevelSystem;
 import engine.utils.Point;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 
 /** Tests for the {@link LevelUtils} class. */
+@CleanGame
 public class LevelUtilsTest {
 
   // default layout is:
@@ -67,12 +68,6 @@ public class LevelUtilsTest {
               }
             },
             DesignLabel.DEFAULT));
-  }
-
-  /** WTF? . */
-  @AfterEach
-  public void cleanup() {
-    Game.removeAllSystems();
   }
 
   /** WTF? . */

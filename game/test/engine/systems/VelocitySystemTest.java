@@ -19,12 +19,13 @@ import engine.utils.components.path.SimpleIPath;
 import feature.systems.HealthSystem;
 import java.util.Arrays;
 import java.util.Map;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import testingUtils.CleanGame;
 
 /** Unit tests for the {@link VelocitySystem}. */
+@CleanGame
 public class VelocitySystemTest {
 
   private Entity entity;
@@ -84,12 +85,6 @@ public class VelocitySystemTest {
     entity.add(pc);
     entity.add(dc);
     Game.add(entity);
-  }
-
-  @AfterEach
-  void cleanUp() {
-    Game.removeAllSystems();
-    Game.removeAllEntities();
   }
 
   /**

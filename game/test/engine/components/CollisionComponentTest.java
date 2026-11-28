@@ -7,12 +7,13 @@ import engine.Game;
 import engine.systems.CollisionSystem;
 import engine.utils.Direction;
 import engine.utils.Vector2;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 import testingUtils.SimpleCounter;
 
 /** Collision component tests. */
+@CleanGame
 public class CollisionComponentTest {
 
   private static final double DELTA = 0.0001;
@@ -36,13 +37,6 @@ public class CollisionComponentTest {
     hb2 = new CollideComponent(Vector2.ZERO, Vector2.ONE, null, null);
     e2.add(hb2);
     Game.add(e2);
-  }
-
-  /** Teardown after each test. */
-  @AfterEach
-  public void tearDown() {
-    Game.removeAllEntities();
-    Game.removeAllSystems();
   }
 
   /** On enter no method given. */

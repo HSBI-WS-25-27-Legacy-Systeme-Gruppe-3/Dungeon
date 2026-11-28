@@ -40,17 +40,16 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 import testingUtils.MockNetworkHandler;
 
 /** Tests for client-side network entity reconciliation in {@link GameLoop}. */
+@CleanGame
 public class GameLoopNetworkReconciliationTest {
 
-  /** Cleans up global game state after each test. */
+  /** Resets the network telemetry and configuration after each test. */
   @AfterEach
   public void cleanup() {
-    Game.removeAllEntities();
-    Game.removeAllSystems();
-    Game.currentLevel(null);
     NetworkTelemetry.reset();
     PreRunConfiguration.multiplayerEnabled(false);
     PreRunConfiguration.isNetworkServer(true);
@@ -59,8 +58,6 @@ public class GameLoopNetworkReconciliationTest {
   /** A repeated server show preserves the local dialog and its current presentation state. */
   @Test
   public void repeatedDialogShowKeepsOneInstanceUntilServerClose() throws Exception {
-    Game.removeAllEntities();
-    Game.removeAllSystems();
     MockNetworkHandler.useLocalNetworkHandler();
     PreRunConfiguration.multiplayerEnabled(true);
     PreRunConfiguration.isNetworkServer(false);

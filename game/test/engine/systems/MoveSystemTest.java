@@ -26,9 +26,9 @@ import engine.utils.Vector2;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import testingUtils.CleanGame;
 
 /**
  * Unit tests for the {@link MoveSystem}.
@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
  * <p>The system gets its own level handle, so the tests set the level with {@code
  * levelRes.set(...)} instead of changing the global game state.
  */
+@CleanGame
 public class MoveSystemTest {
 
   private static final float EPSILON = 0.00001f;
@@ -64,12 +65,6 @@ public class MoveSystemTest {
 
     // Setup initial position and velocity default
     vc.currentVelocity(Vector2.ZERO);
-  }
-
-  @AfterEach
-  void cleanUp() {
-    Game.removeAllSystems();
-    Game.removeAllEntities();
   }
 
   /**

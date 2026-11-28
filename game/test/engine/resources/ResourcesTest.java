@@ -7,12 +7,13 @@ import engine.Game;
 import engine.level.elements.ILevel;
 import engine.systems.LevelSystem;
 import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import testingUtils.CleanGame;
 
 /** Tests for the {@link Resources} registry. */
+@CleanGame
 public class ResourcesTest {
 
   /**
@@ -26,14 +27,6 @@ public class ResourcesTest {
   @BeforeEach
   public void setup() {
     Game.add(new LevelSystem());
-  }
-
-  /** Resets the global game state. */
-  @AfterEach
-  public void cleanup() {
-    Game.currentLevel(null);
-    Game.removeAllSystems();
-    Resources.clear();
   }
 
   /** A handle for a type that was never inserted is empty. */
