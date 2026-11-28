@@ -57,18 +57,26 @@ public class ItemPotionHealth extends Item {
   }
 
   /**
-   * Uses the health potion on the specified entity. The potion is removed from the entity's
-   * inventory and the entity is healed by the heal_amount.
+   * Uses the health potion if the specified entity has missing health points.
+   *
+   * <p>At full health, the potion remains in the inventory. Otherwise, one potion is consumed
+   * before its healing is queued for the health system.
    *
    * @param e The entity that uses the potion.
    */
   @Override
   public void use(final Entity e) {
+    HealthComponent health = e.fetch(HealthComponent.class).orElse(null);
+    if (health == null || health.currentHealthpoints() >= health.maximalHealthpoints()) {
+      return;
+    }
+
     e.fetch(InventoryComponent.class)
         .ifPresent(
             component -> {
-              component.removeOne(this);
-              this.healUser(this.healAmount, e);
+              if (component.removeOne(this)) {
+                this.healUser(this.healAmount, e);
+              }
             });
   }
 
