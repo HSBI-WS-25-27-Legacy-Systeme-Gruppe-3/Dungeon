@@ -9,6 +9,7 @@ import engine.Entity;
 import engine.Game;
 import engine.game.ECSManagement;
 import engine.game.PreRunConfiguration;
+import engine.level.elements.ILevel;
 import engine.level.loader.DungeonLoader;
 import engine.network.FullSnapshotSendReason;
 import engine.network.NetworkTelemetry;
@@ -17,6 +18,9 @@ import engine.network.delta.SnapshotHistory;
 import engine.network.messages.s2c.DeltaSnapshotMessage;
 import engine.network.messages.s2c.GameOverEvent;
 import engine.network.messages.s2c.SnapshotMessage;
+import engine.resources.Changes;
+import engine.resources.Res;
+import engine.resources.Resources;
 import engine.utils.Point;
 import engine.utils.logging.DungeonLogger;
 import feature.entities.HeroBuilder;
@@ -29,6 +33,8 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+// TODO: 1. Add missing imports (ILevel, Changes, Res, and Resources)
 
 /**
  * The main server loop for the authoritative multiplayer server.
@@ -62,16 +68,25 @@ public final class AuthoritativeServerLoop {
   private volatile int serverTick = 0;
   private volatile boolean bootstrapComplete;
   private boolean worldInitialized;
-  private String snapshotLevelName;
-  private Object snapshotLevelIdentity;
+
+  private final Changes levelChanges;
+  private boolean firstLevelSeen;
+
+  public AuthoritativeServerLoop(ServerTransport netService) {
+    this(netService, Resources.level());
+  }
 
   /**
-   * Creates a new AuthoritativeServerLoop with the given ServerTransport.
+   * Creates a new AuthoritativeServerLoop that detects level changes of the given handle.
+   *
+   * <p>Intended for tests, which can pass a fixed or mutable handle instead of the game state.
    *
    * @param netService The ServerTransport to use for network communication.
+   * @param level handle to the level whose changes reset the snapshot baselines
    */
-  public AuthoritativeServerLoop(ServerTransport netService) {
+  AuthoritativeServerLoop(ServerTransport netService, Res<ILevel> level) {
     this.net = netService;
+    this.levelChanges = Changes.of(level);
     this.executor =
         Executors.newSingleThreadScheduledExecutor(
             r -> {
@@ -213,8 +228,11 @@ public final class AuthoritativeServerLoop {
 
   private void sendSnapshotToClient(ClientState client, SnapshotMessage currentSnapshot) {
     ClientSnapshotSyncState snapshotSync = client.snapshotSync();
+
+    // Snapshot confirmation of client
     int ackTick = snapshotSync.lastAckedSnapshotTick();
     boolean hasAck = snapshotSync.hasAck();
+
     boolean baselineInHistory = hasAck && snapshotHistory.contains(ackTick);
     NetworkTelemetry.recordBaselineHealth(
         client.clientId(),
@@ -286,27 +304,21 @@ public final class AuthoritativeServerLoop {
             });
   }
 
-  private void clearSnapshotBaselinesOnLevelChange(Set<ClientState> clients) {
-    Optional<String> currentLevel = currentLevelName();
-    if (currentLevel.isEmpty()) {
+  public void clearSnapshotBaselinesOnLevelChange(Set<ClientState> clients) {
+    // As before, only levels loaded by the DungeonLoader (they have a name) are considered.
+    if (currentLevelName().isEmpty()) {
       return;
     }
-    String levelName = currentLevel.orElseThrow();
-    Object levelIdentity = Game.currentLevel().map(level -> (Object) level).orElse(null);
-    if (snapshotLevelName == null && snapshotLevelIdentity == null) {
-      rememberSnapshotLevel(levelName, levelIdentity);
+    if (!levelChanges.changedSinceLastCheck()) {
       return;
     }
-    if (!levelName.equals(snapshotLevelName) || levelIdentity != snapshotLevelIdentity) {
-      snapshotHistory.clear();
-      clients.forEach(client -> client.clearSnapshotBaseline(FullSnapshotSendReason.LEVEL_CHANGE));
-      rememberSnapshotLevel(levelName, levelIdentity);
+    if (!firstLevelSeen) {
+      // The first level only becomes the starting point; there is nothing to clear yet.
+      firstLevelSeen = true;
+      return;
     }
-  }
-
-  private void rememberSnapshotLevel(String levelName, Object levelIdentity) {
-    snapshotLevelName = levelName;
-    snapshotLevelIdentity = levelIdentity;
+    snapshotHistory.clear();
+    clients.forEach(client -> client.clearSnapshotBaseline(FullSnapshotSendReason.LEVEL_CHANGE));
   }
 
   private Optional<String> currentLevelName() {

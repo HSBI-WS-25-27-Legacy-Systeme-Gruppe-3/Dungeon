@@ -75,3 +75,7 @@ __pycache__/
 # Executable binaries
 *.exe
 *.bin
+
+# Exclude personal notes
+########################
+personal-notes-dungeon/

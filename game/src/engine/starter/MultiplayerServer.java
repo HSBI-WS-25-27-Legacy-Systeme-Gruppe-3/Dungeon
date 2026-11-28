@@ -36,8 +36,10 @@ public class MultiplayerServer {
     DungeonLoggerConfig.initWithLevel(DungeonLogLevel.DEBUG);
     PreRunConfiguration.multiplayerEnabled(true);
     PreRunConfiguration.isNetworkServer(true);
+    // Add new start level (Test Purpose Authoritative Server Loop)
+    DungeonLoader.addLevel(Tuple.of("maze", DungeonLevel.class));
+    // After completing maze, change level to playground (Test Purpose Authoritative Server Loop)
     DungeonLoader.addLevel(Tuple.of("playground", DungeonLevel.class));
-
     Game.userOnSetup(MultiplayerServer::onSetup);
     Game.userOnFrame(MultiplayerServer::onFrame);
 
