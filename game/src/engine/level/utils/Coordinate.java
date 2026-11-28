@@ -47,8 +47,11 @@ public record Coordinate(int x, int y) {
   /**
    * Moves this coordinate by a vector.
    *
+   * <p>Each vector component is truncated toward zero before being added to the coordinate.
+   * Fractional parts are discarded, including for negative values.
+   *
    * @param vector The vector to move the coordinate by.
-   * @return A new coordinate that is the sum of this coordinate and the given vector.
+   * @return A new coordinate translated by the truncated vector components.
    */
   public Coordinate translate(final Vector2 vector) {
     return new Coordinate(this.x + (int) vector.x(), this.y + (int) vector.y());
